@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Inspeksi Panel Elektrikal & PDF Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jsPDF & AutoTable for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        electric: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 bg-slate-100 antialiased">
+
+    <!-- Top Bar Navigation -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand & Logo Panelin Electric -->
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center">
+                        <svg class="h-11 w-auto" viewBox="0 0 320 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Shield Background -->
+                            <path d="M20 15 C20 15, 45 10, 70 15 C70 45, 65 70, 45 82 C25 70, 20 45, 20 15 Z" fill="#0b1e36" stroke="#1d4ed8" stroke-width="2"/>
+                            <!-- Indicator bars inside shield -->
+                            <rect x="30" y="28" width="4" h="10" fill="#f59e0b" rx="1"/>
+                            <rect x="37" y="24" width="4" h="14" fill="#f59e0b" rx="1"/>
+                            <rect x="44" y="21" width="4" h="17" fill="#f59e0b" rx="1"/>
+                            <!-- Yellow Lightning Bolt -->
+                            <path d="M56 10 L28 48 L43 48 L26 82 L64 38 L47 38 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1"/>
+                            <!-- Text PANELIN -->
+                            <text x="88" y="38" font-family="'Inter', sans-serif" font-weight="900" font-size="30" fill="#1d4ed8" letter-spacing="1">PANELIN</text>
+                            <!-- Text ELECTRIC -->
+                            <text x="88" y="58" font-family="'Inter', sans-serif" font-weight="900" font-size="19" fill="#f59e0b" letter-spacing="2">ELECTRIC</text>
+                            <line x1="215" y1="52" x2="258" y2="52" stroke="#f59e0b" stroke-width="3"/>
+                            <!-- Banner ELEKTRIKAL INDONESIA -->
+                            <path d="M82 64 L262 64 L256 80 L80 80 Z" fill="#1e3a8a"/>
+                            <path d="M78 81 L258 81" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="90" y="76" font-family="'Inter', sans-serif" font-weight="800" font-size="10" fill="#ffffff" letter-spacing="1.2">ELEKTRIKAL INDONESIA</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 bg-slate-800 text-amber-400">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('inspection-form')" id="nav-inspection-form" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-clipboard-check"></i> Form Inspeksi
+                    </button>
+                    <button onclick="switchTab('template-crud')" id="nav-template-crud" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-list-check"></i> Kelola Items (CRUD)
+                    </button>
+                    <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-gear"></i> Pengaturan
+                    </button>
+                </nav>
+
+                <!-- Action Button Mobile Menu -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900 px-4 pt-2 pb-4 space-y-1">
+            <button onclick="switchTab('dashboard'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </button>
+            <button onclick="switchTab('inspection-form'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check w-5"></i> Form Inspeksi
+            </button>
+            <button onclick="switchTab('template-crud'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-list-check w-5"></i> Kelola Items (CRUD)
+            </button>
+            <button onclick="switchTab('settings'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan Company
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- VIEW 1: DASHBOARD & HISTORY -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <!-- Top Action Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Riwayat Inspeksi Panel</h2>
+                    <p class="text-sm text-slate-500 mt-1">Kelola data inspeksi, lihat status, dan cetak laporan PDF untuk manajemen.</p>
+                </div>
+                <button onclick="startNewInspection()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Buat Inspeksi Baru
+                </button>
+            </div>
+
+            <!-- Analytics Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Inspeksi</p>
+                        <h3 id="stat-total" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kondisi Baik / Pass</p>
+                        <h3 id="stat-pass" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Butuh Perhatian</p>
+                        <h3 id="stat-warning" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kritis / Bahaya</p>
+                        <h3 id="stat-fail" class="text-2xl font-bold text-red-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search Bar -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-history" onkeyup="filterInspectionList()" placeholder="Cari nama panel, lokasi, atau inspektor..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <select id="filter-status" onchange="filterInspectionList()" class="w-full md:w-48 py-2 px-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
+                        <option value="ALL">Semua Status</option>
+                        <option value="LULUS">Kondisi LULUS / Baik</option>
+                        <option value="PERHATIAN">DENGAN CATATAN</option>
+                        <option value="BAHAYA">BAHAYA / GAGAL</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table of History -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 uppercase font-semibold border-b border-slate-200 text-xs tracking-wider">
+                            <tr>
+                                <th class="p-4">No. Laporan</th>
+                                <th class="p-4">Nama Panel / Tag</th>
+                                <th class="p-4">Lokasi & Area</th>
+                                <th class="p-4">Tanggal Inspeksi</th>
+                                <th class="p-4">Inspektor</th>
+                                <th class="p-4 text-center">Status</th>
+                                <th class="p-4 text-center">Foto Evidence</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inspection-table-body" class="divide-y divide-slate-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="history-empty-state" class="hidden p-12 text-center">
+                    <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <p class="font-semibold text-slate-700">Belum Ada Data Inspeksi</p>
+                    <p class="text-xs text-slate-500 mt-1">Mulai lakukan pemeriksaan panel dengan mengklik tombol "Buat Inspeksi Baru".</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- VIEW 2: INSPECTION FORM (EXECUTION) -->
+        <section id="tab-inspection-form" class="tab-content hidden space-y-6">
+            <form id="inspectionForm" onsubmit="handleFormSubmit(event)">
+                <!-- Form Navigation / Status Bar -->
+                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="form-mode-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-slate-950">Mode Baru</span>
+                            <span id="doc-id-display" class="text-xs text-slate-400 font-mono">ID: AUTO</span>
+                        </div>
+                        <h2 class="text-2xl font-bold mt-1 text-white">Lembar CheckList Panel Elektrikal</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Isi detail fisik, kriteria keamanan, pengukuran arus/tegangan, dan lampirkan foto evidence.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="switchTab('dashboard')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-medium transition">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Data Inspeksi
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 1: Panel & General Information -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-sliders text-amber-500"></i> Informasi Umum Panel & Lokasi
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama / Kode Panel *</label>
+                            <input type="text" id="panelName" required placeholder="Contoh: LVT-01 / LDP MDP Building A" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Lokasi / Area *</label>
+                            <input type="text" id="panelLocation" required placeholder="Contoh: Ruang Utility Lt. 1" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tipe Panel *</label>
+                            <select id="panelType" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
+                                <option value="LVT (Low Voltage Transformer)">LVT (Low Voltage Transformer)</option>
+                                <option value="MDP (Main Distribution Panel)">MDP (Main Distribution Panel)</option>
+                                <option value="SDP (Sub Distribution Panel)">SDP (Sub Distribution Panel)</option>
+                                <option value="Control Panel / ATS-AMF">Control Panel / ATS-AMF</option>
+                                <option value="Capacitor Bank Panel">Capacitor Bank Panel</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tegangan Sistem Rating</label>
+                            <input type="text" id="ratedVoltage" placeholder="Contoh: 380V / 220V 3 Phase" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Inspektor *</label>
+                            <input type="text" id="inspectorName" required placeholder="Nama Teknisi / Electrical Eng." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal & Waktu Inspeksi *</label>
+                            <input type="datetime-local" id="inspectionDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Dynamic Inspection Checklist Categories -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-amber-500"></i> Detail Parameter CheckList Inspeksi
+                        </h3>
+                        <span class="text-xs text-slate-500">Pilih status kondisi untuk tiap parameter</span>
+                    </div>
+
+                    <div id="dynamic-checklist-container" class="space-y-6">
+                        <!-- Populated dynamically based on Master Checklist CRUD -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Evidence Photo Uploads -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-camera text-amber-500"></i> Evidence Foto Dokumentasi
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Upload foto tampak luar, komponen dalam, hasil ukur, atau temuan kerusakkan.</p>
+                        </div>
+                        <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-2 border border-slate-300">
+                            <i class="fa-solid fa-upload"></i> Tambah Foto Evidence
+                            <input type="file" id="evidence-input" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
+                        </label>
+                    </div>
+
+                    <!-- Photo Preview Grid -->
+                    <div id="evidence-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <!-- Populated Dynamically -->
+                    </div>
+                    <p id="evidence-empty-msg" class="text-xs text-slate-400 italic text-center py-4">Belum ada foto evidence diunggah.</p>
+                </div>
+
+                <!-- Section 4: General Notes & Summary Recommendation -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-comment-dots text-amber-500"></i> Catatan Kesimpulan & Tindakan Lanjut
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan/Rekomendasi Inspektor</label>
+                            <textarea id="overallNotes" rows="3" placeholder="Tuliskan temuan khusus, usulan perbaikan, atau jadwal maintenance berikutnya..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Status Keputusan Inspeksi *</label>
+                            <select id="overallStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
+                                <option value="LULUS" class="text-emerald-600">LULUS / KONDISI BAIK</option>
+                                <option value="PERHATIAN" class="text-amber-600">PERHATIAN / DENGAN CATATAN</option>
+                                <option value="BAHAYA" class="text-red-600">BAHAYA / PERLU PERBAIKAN SEGERA</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Digital Signatures -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-signature text-amber-500"></i> Tanda Tangan Pengesahan (Digital Signature)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Inspector Signature -->
+                        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-700 uppercase">1. Tanda Tangan Inspektor / Teknisi</span>
+                                <button type="button" onclick="clearSignature('inspector')" class="text-xs text-red-500 hover:underline">Reset Canvas</button>
+                            </div>
+                            <canvas id="canvas-inspector" class="w-full h-32 bg-white border border-slate-300 rounded-lg cursor-crosshair touch-none"></canvas>
+                        </div>
+
+                        <!-- Supervisor Signature -->
+                        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-700 uppercase">2. Tanda Tangan Supervisor / Atasan</span>
+                                <button type="button" onclick="clearSignature('supervisor')" class="text-xs text-red-500 hover:underline">Reset Canvas</button>
+                            </div>
+                            <canvas id="canvas-supervisor" class="w-full h-32 bg-white border border-slate-300 rounded-lg cursor-crosshair touch-none"></canvas>
+                            <input type="text" id="supervisorName" placeholder="Nama Supervisor / Manager" class="w-full mt-2 px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-amber-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Toolbar -->
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="switchTab('dashboard')" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl text-sm transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Laporan Inspeksi
+                    </button>
+                </div>
+            </form>
+        </section>
+
+
+        <!-- VIEW 3: TEMPLATE CRUD MANAGER -->
+        <section id="tab-template-crud" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Kelola Parameter Inspeksi (CRUD Master)</h2>
+                    <p class="text-sm text-slate-500 mt-1">Atur kriteria checklist standar panel elektrikal sesuai SOP perusahaan Anda.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="resetTemplateToDefault()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl transition">
+                        <i class="fa-solid fa-rotate-left"></i> Reset ke Standar Utama
+                    </button>
+                    <button onclick="openAddItemModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Item Inspeksi Baru
+                    </button>
+                </div>
+            </div>
+
+            <!-- List of categories and CRUD items -->
+            <div id="master-items-container" class="space-y-6">
+                <!-- Dynamically Generated Master Items -->
+            </div>
+        </section>
+
+
+        <!-- VIEW 4: COMPANY & REPORT SETTINGS -->
+        <section id="tab-settings" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6 max-w-3xl mx-auto">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Pengaturan Kop Laporan PDF</h2>
+                    <p class="text-xs text-slate-500 mt-1">Informasi ini akan ditampilkan pada bagian header Laporan PDF untuk Atasan.</p>
+                </div>
+
+                <div class="space-y-4 border-t border-slate-100 pt-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Perusahaan / Organisasi</label>
+                        <input type="text" id="settingCompanyName" value="PANELIN ELECTRIC - ELEKTRIKAL INDONESIA" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sub-judul Laporan / Departemen</label>
+                        <input type="text" id="settingSubTitle" value="DEPARTEMEN MAINTENANCE & INSPEKSI PANEL ELEKTRIKAL" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Singkat & Kontak</label>
+                        <input type="text" id="settingAddress" value="Kawasan Industri Terpadu, Jakarta - Indonesia | Telp: (021) 555-0199" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="saveSettings()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow transition">
+                        <i class="fa-solid fa-check mr-2"></i> Simpan Pengaturan Kop
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: ADD/EDIT MASTER ITEM (CRUD) -->
+    <div id="itemModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 id="modalItemTitle" class="font-bold text-slate-900 text-lg">Tambah Parameter CheckList</h3>
+                <button onclick="closeItemModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="itemForm" onsubmit="saveMasterItem(event)" class="space-y-4">
+                <input type="hidden" id="editItemId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Parameter *</label>
+                    <input type="text" id="itemCategory" required list="categoryList" placeholder="Pilih atau tulis kategori baru..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500">
+                    <datalist id="categoryList">
+                        <option value="1. Pemeriksaan Fisik & Kebersihan Panel">
+                        <option value="2. Komponen Pengaman & Terminal Kabel">
+                        <option value="3. Pengukuran Tegangan & Arus Listrik">
+                        <option value="4. Pengujian Isolasi & Pentanahan (Grounding)">
+                        <option value="5. Indikator, Aksesoris & Suhu Ruang">
+                    </datalist>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Items / Parameter Check *</label>
+                    <input type="text" id="itemName" required placeholder="Contoh: Kondisi Kekencangan Baut Busbar" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Standar Acuan / SOP</label>
+                    <input type="text" id="itemStandard" placeholder="Contoh: Baut kencang (Torque K3) & tidak kendur" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tipe Input Lapangan</label>
+                    <select id="itemInputType" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 bg-white">
+                        <option value="STATUS">Pilihan Status (Baik / Perhatian / Rusak)</option>
+                        <option value="NUMBER">Nilai Angka / Pengukuran (Volt, Ampere, Ohm, °C)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                    <button type="button" onclick="closeItemModal()" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-500 text-slate-950 rounded-xl text-xs font-bold">Simpan Parameter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: DETAIL VIEW INSPECTION REPORT -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-lg" id="detailModalTitle">Detail Laporan Inspeksi Panel</h3>
+                    <p class="text-xs text-slate-400" id="detailModalSub">ID: -</p>
+                </div>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6" id="detailModalContent">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="bg-slate-50 border-t border-slate-200 p-4 px-6 flex justify-between items-center">
+                <span class="text-xs text-slate-500">ElecCheck Pro Engine</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeDetailModal()" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold">Tutup</button>
+                    <button id="detailModalPdfBtn" onclick="" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-file-pdf text-sm"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 transition-all duration-300 transform translate-y-20 opacity-0 z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
+        <span id="toast-message" class="text-sm font-medium">Notifikasi</span>
+    </div>
+
+
+    <script>
+        // Default Checklist Master Data (Standard Electrical Panel SOP)
+        const DEFAULT_CHECKLIST = [
+            {
+                id: 'm1',
+                category: '1. Pemeriksaan Fisik & Kebersihan Panel',
+                name: 'Kondisi Enclosure / Box Panel & Cat',
+                standard: 'Bebas korosi, engsel pintu lancar, cat tidak mengelupas',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm2',
+                category: '1. Pemeriksaan Fisik & Kebersihan Panel',
+                name: 'Kebersihan Dalam Panel & Ventilasi',
+                standard: 'Bebas debu, jelaga, sarangga, & sampah material',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm3',
+                category: '1. Pemeriksaan Fisik & Kebersihan Panel',
+                name: 'Karet Seal Pintu & Locking System',
+                standard: 'Rapat, elastis, kunci dapat mengunci rapat',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm4',
+                category: '2. Komponen Pengaman & Terminal Kabel',
+                name: 'Kondisi Utama Breaker (MCCB/ACB/MCB)',
+                standard: 'Bebas tanda gosong, retak, mekanis switch lancar',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm5',
+                category: '2. Komponen Pengaman & Terminal Kabel',
+                name: 'Kekencangan Baut Terminal & Cable Lug',
+                standard: 'Terkunci kencang (Sesuai torque), tidak longgar',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm6',
+                category: '2. Komponen Pengaman & Terminal Kabel',
+                name: 'Kondisi Isolator & Busbar',
+                standard: 'Bebas kotoran konduktif, insulasi rapat, tak berbau gosong',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm7',
+                category: '3. Pengukuran Tegangan & Arus Listrik',
+                name: 'Tegangan Fasa ke Fasa (R-S, S-T, T-R)',
+                standard: 'Nominal 380V - 400V AC (Toleransi ± 5%)',
+                inputType: 'NUMBER'
+            },
+            {
+                id: 'm8',
+                category: '3. Pengukuran Tegangan & Arus Listrik',
+                name: 'Tegangan Fasa ke Netral (R-N, S-N, T-N)',
+                standard: 'Nominal 220V - 230V AC',
+                inputType: 'NUMBER'
+            },
+            {
+                id: 'm9',
+                category: '3. Pengukuran Tegangan & Arus Listrik',
+                name: 'Beban Arus Maksimum (R, S, T, N)',
+                standard: 'Tidak melebihi Kapasitas Nominal Breaker (Ampere)',
+                inputType: 'NUMBER'
+            },
+            {
+                id: 'm10',
+                category: '4. Pengujian Isolasi & Pentanahan (Grounding)',
+                name: 'Resistansi Isolasi Fasa-Fasa & Fasa-Ground',
+                standard: 'Minimal > 1 MΩ (MegaOhm)',
+                inputType: 'NUMBER'
+            },
+            {
+                id: 'm11',
+                category: '4. Pengujian Isolasi & Pentanahan (Grounding)',
+                name: 'Nilai Tahanan Pentanahan (Grounding Test)',
+                standard: 'Standar PUIL < 5.0 Ohm',
+                inputType: 'NUMBER'
+            },
+            {
+                id: 'm12',
+                category: '5. Indikator, Aksesoris & Suhu Ruang',
+                name: 'Lampu Indikator (R-S-T) & Volt-Ampere Meter',
+                standard: 'Menyala terang, meter membaca akurat',
+                inputType: 'STATUS'
+            },
+            {
+                id: 'm13',
+                category: '5. Indikator, Aksesoris & Suhu Ruang',
+                name: 'Exhaust Fan Panel & Thermostat / Heater',
+                standard: 'Berputar halus, kipas bersih, fungsi otomatis aktif',
+                inputType: 'STATUS'
+            }
+        ];
+
+        // Global State Variables
+        let masterItems = [];
+        let inspectionHistory = [];
+        let uploadedEvidence = [];
+        let editingInspectionId = null;
+        let companySettings = {
+            name: "PANELIN ELECTRIC - ELEKTRIKAL INDONESIA",
+            subTitle: "DEPARTEMEN MAINTENANCE & INSPEKSI PANEL ELEKTRIKAL",
+            address: "Kawasan Industri Terpadu, Jakarta - Indonesia | Telp: (021) 555-0199"
+        };
+
+        // Signature Canvas Drawing Logic Setup
+        let canvasInspector, canvasSupervisor;
+        let ctxInspector, ctxSupervisor;
+        let isDrawingInspector = false, isDrawingSupervisor = false;
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLocalStorageData();
+            setupSignatureCanvases();
+            renderMasterItemsCRUD();
+            renderDynamicInspectionForm();
+            renderHistoryTable();
+            updateStats();
+            
+            // Set Default Inspection Date to Now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('inspectionDate').value = now.toISOString().slice(0, 16);
+        });
+
+        function loadLocalStorageData() {
+            // Master Items
+            const savedItems = localStorage.getItem('eleccheck_master_items');
+            if (savedItems) {
+                masterItems = JSON.parse(savedItems);
+            } else {
+                masterItems = [...DEFAULT_CHECKLIST];
+                localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
+            }
+
+            // Inspection History
+            const savedHistory = localStorage.getItem('eleccheck_inspections');
+            if (savedHistory) {
+                inspectionHistory = JSON.parse(savedHistory);
+            }
+
+            // Company Settings
+            const savedSettings = localStorage.getItem('eleccheck_settings');
+            if (savedSettings) {
+                companySettings = JSON.parse(savedSettings);
+                document.getElementById('settingCompanyName').value = companySettings.name;
+                document.getElementById('settingSubTitle').value = companySettings.subTitle;
+                document.getElementById('settingAddress').value = companySettings.address;
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+            } else if (type === 'error') {
+                toastIcon.className = "fa-solid fa-circle-xmark text-red-400";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-amber-400";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-amber-400');
+                btn.classList.add('text-slate-300');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-slate-800', 'text-amber-400');
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function setupSignatureCanvases() {
+            canvasInspector = document.getElementById('canvas-inspector');
+            canvasSupervisor = document.getElementById('canvas-supervisor');
+
+            if (!canvasInspector || !canvasSupervisor) return;
+
+            // Resize canvas resolution
+            [canvasInspector, canvasSupervisor].forEach(canvas => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            });
+
+            ctxInspector = canvasInspector.getContext('2d');
+            ctxSupervisor = canvasSupervisor.getContext('2d');
+
+            [ctxInspector, ctxSupervisor].forEach(ctx => {
+                ctx.strokeStyle = "#0f172a";
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = "round";
+            });
+
+            // Event Listeners for Inspector
+            setupCanvasEvents(canvasInspector, ctxInspector, () => isDrawingInspector, (val) => isDrawingInspector = val);
+            // Event Listeners for Supervisor
+            setupCanvasEvents(canvasSupervisor, ctxSupervisor, () => isDrawingSupervisor, (val) => isDrawingSupervisor = val);
+        }
+
+        function setupCanvasEvents(canvas, ctx, getDrawing, setDrawing) {
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                setDrawing(true);
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!getDrawing()) return;
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            });
+
+            window.addEventListener('mouseup', () => setDrawing(false));
+
+            // Touch support for phones
+            canvas.addEventListener('touchstart', (e) => {
+                setDrawing(true);
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                e.preventDefault();
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!getDrawing()) return;
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                e.preventDefault();
+            });
+
+            canvas.addEventListener('touchend', () => setDrawing(false));
+        }
+
+        function clearSignature(type) {
+            if (type === 'inspector') {
+                ctxInspector.clearRect(0, 0, canvasInspector.width, canvasInspector.height);
+            } else {
+                ctxSupervisor.clearRect(0, 0, canvasSupervisor.width, canvasSupervisor.height);
+            }
+        }
+
+        function renderMasterItemsCRUD() {
+            const container = document.getElementById('master-items-container');
+            container.innerHTML = '';
+
+            // Group items by category
+            const categories = {};
+            masterItems.forEach(item => {
+                if (!categories[item.category]) categories[item.category] = [];
+                categories[item.category].push(item);
+            });
+
+            if (Object.keys(categories).length === 0) {
+                container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-slate-500">Belum ada item checklist master. Silahkan tambahkan item baru.</div>`;
+                return;
+            }
+
+            for (const catName in categories) {
+                const groupEl = document.createElement('div');
+                groupEl.className = "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3";
+                
+                let itemsHtml = categories[catName].map(item => `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 transition gap-3">
+                        <div class="space-y-0.5">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">${item.inputType === 'NUMBER' ? 'Pengukuran / Nilai' : 'Status Check'}</span>
+                            <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
+                            <p class="text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i>Acuan: ${item.standard || '-'}</p>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-center">
+                            <button onclick="editMasterItem('${item.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button onclick="deleteMasterItem('${item.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                groupEl.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-folder text-amber-500"></i> ${catName}
+                        </h3>
+                        <span class="text-xs font-medium text-slate-500">${categories[catName].length} Items</span>
+                    </div>
+                    <div class="space-y-2">
+                        ${itemsHtml}
+                    </div>
+                `;
+                container.appendChild(groupEl);
+            }
+        }
+
+        function openAddItemModal() {
+            document.getElementById('editItemId').value = '';
+            document.getElementById('itemForm').reset();
+            document.getElementById('modalItemTitle').innerText = "Tambah Parameter CheckList Baru";
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.add('hidden');
+        }
+
+        function editMasterItem(id) {
+            const item = masterItems.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemStandard').value = item.standard;
+            document.getElementById('itemInputType').value = item.inputType;
+
+            document.getElementById('modalItemTitle').innerText = "Edit Parameter CheckList";
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+
+        function saveMasterItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editItemId').value;
+            const category = document.getElementById('itemCategory').value;
+            const name = document.getElementById('itemName').value;
+            const standard = document.getElementById('itemStandard').value;
+            const inputType = document.getElementById('itemInputType').value;
+
+            if (editId) {
+                // Update
+                const idx = masterItems.findIndex(i => i.id === editId);
+                if (idx !== -1) {
+                    masterItems[idx] = { id: editId, category, name, standard, inputType };
+                    showToast('Item berhasil diperbarui!', 'success');
+                }
+            } else {
+                // Create
+                const newItem = {
+                    id: 'm_' + Date.now(),
+                    category,
+                    name,
+                    standard,
+                    inputType
+                };
+                masterItems.push(newItem);
+                showToast('Item baru ditambahkan!', 'success');
+            }
+
+            localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
+            closeItemModal();
+            renderMasterItemsCRUD();
+            renderDynamicInspectionForm();
+        }
+
+        function deleteMasterItem(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus item parameter ini dari template?')) {
+                masterItems = masterItems.filter(i => i.id !== id);
+                localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
+                renderMasterItemsCRUD();
+                renderDynamicInspectionForm();
+                showToast('Item berhasil dihapus', 'info');
+            }
+        }
+
+        function resetTemplateToDefault() {
+            if (confirm('Kembalikan semua item parameter ke standar awal pabrikan?')) {
+                masterItems = [...DEFAULT_CHECKLIST];
+                localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
+                renderMasterItemsCRUD();
+                renderDynamicInspectionForm();
+                showToast('Template direset ke standar', 'success');
+            }
+        }
+
+        function renderDynamicInspectionForm() {
+            const container = document.getElementById('dynamic-checklist-container');
+            container.innerHTML = '';
+
+            const categories = {};
+            masterItems.forEach(item => {
+                if (!categories[item.category]) categories[item.category] = [];
+                categories[item.category].push(item);
+            });
+
+            if (Object.keys(categories).length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-slate-500">Tidak ada parameter aktif. Tambahkan di menu 'Kelola Items (CRUD)'.</div>`;
+                return;
+            }
+
+            for (const catName in categories) {
+                const catCard = document.createElement('div');
+                catCard.className = "border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50";
+
+                let rowsHtml = categories[catName].map((item, index) => {
+                    if (item.inputType === 'STATUS') {
+                        return `
+                            <div class="p-4 bg-white border-b border-slate-100 last:border-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="md:w-1/2 space-y-0.5">
+                                    <span class="text-xs font-bold text-slate-400">#${index+1}</span>
+                                    <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
+                                    <p class="text-xs text-slate-500"><span class="font-semibold">Acuan:</span> ${item.standard || '-'}</p>
+                                </div>
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:w-1/2 justify-end">
+                                    <div class="inline-flex rounded-lg shadow-sm" role="group">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="check_${item.id}" value="BAIK" checked class="peer hidden">
+                                            <span class="px-3 py-1.5 text-xs font-bold rounded-l-lg border border-slate-300 bg-white text-slate-600 peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-500 block transition">
+                                                <i class="fa-solid fa-check mr-1"></i>Baik
+                                            </span>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="check_${item.id}" value="PERHATIAN" class="peer hidden">
+                                            <span class="px-3 py-1.5 text-xs font-bold border-t border-b border-slate-300 bg-white text-slate-600 peer-checked:bg-amber-500 peer-checked:text-slate-950 peer-checked:border-amber-500 block transition">
+                                                <i class="fa-solid fa-exclamation-triangle mr-1"></i>Perhatian
+                                            </span>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="check_${item.id}" value="RUSAK" class="peer hidden">
+                                            <span class="px-3 py-1.5 text-xs font-bold rounded-r-lg border border-slate-300 bg-white text-slate-600 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 block transition">
+                                                <i class="fa-solid fa-xmark mr-1"></i>Rusak
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <input type="text" id="note_${item.id}" placeholder="Catatan khusus..." class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs w-full sm:w-48 focus:ring-1 focus:ring-amber-500">
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Value / Measurement Input
+                        return `
+                            <div class="p-4 bg-white border-b border-slate-100 last:border-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="md:w-1/2 space-y-0.5">
+                                    <span class="text-xs font-bold text-slate-400">#${index+1}</span>
+                                    <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
+                                    <p class="text-xs text-slate-500"><span class="font-semibold">Acuan:</span> ${item.standard || '-'}</p>
+                                </div>
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:w-1/2 justify-end">
+                                    <div class="relative flex-1 sm:w-40">
+                                        <input type="text" id="value_${item.id}" placeholder="Nilai Ukur..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-amber-500">
+                                    </div>
+                                    <select id="status_val_${item.id}" class="px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold bg-white">
+                                        <option value="BAIK">Status: NORMAL</option>
+                                        <option value="PERHATIAN">Status: ABKURANG/WARNI</option>
+                                        <option value="RUSAK">Status: ANOMALI/ABNORMAL</option>
+                                    </select>
+                                    <input type="text" id="note_${item.id}" placeholder="Keterangan..." class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs w-full sm:w-36 focus:ring-1 focus:ring-amber-500">
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+
+                catCard.innerHTML = `
+                    <div class="bg-slate-100 px-4 py-2.5 border-b border-slate-200">
+                        <h4 class="font-bold text-slate-800 text-sm">${catName}</h4>
+                    </div>
+                    <div>${rowsHtml}</div>
+                `;
+                container.appendChild(catCard);
+            }
+        }
+
+        function handleImageUpload(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedEvidence.push({
+                        id: 'img_' + Date.now() + Math.random().toString(36).substr(2, 4),
+                        dataUrl: evt.target.result,
+                        caption: file.name
+                    });
+                    renderEvidenceGrid();
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+
+        function renderEvidenceGrid() {
+            const grid = document.getElementById('evidence-preview-grid');
+            const emptyMsg = document.getElementById('evidence-empty-msg');
+            grid.innerHTML = '';
+
+            if (uploadedEvidence.length === 0) {
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+            emptyMsg.classList.add('hidden');
+
+            uploadedEvidence.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.className = "relative group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 shadow-sm";
+                item.innerHTML = `
+                    <img src="${img.dataUrl}" class="w-full h-28 object-cover">
+                    <button type="button" onclick="removeEvidence('${img.id}')" class="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-90 hover:opacity-100 transition shadow">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <div class="p-1.5">
+                        <input type="text" value="${img.caption}" onchange="updateEvidenceCaption('${img.id}', this.value)" placeholder="Keterangan foto..." class="w-full px-2 py-1 text-[11px] border border-slate-200 rounded focus:outline-none focus:border-amber-500">
+                    </div>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        function removeEvidence(id) {
+            uploadedEvidence = uploadedEvidence.filter(i => i.id !== id);
+            renderEvidenceGrid();
+        }
+
+        function updateEvidenceCaption(id, val) {
+            const idx = uploadedEvidence.findIndex(i => i.id === id);
+            if (idx !== -1) uploadedEvidence[idx].caption = val;
+        }
+
+        function startNewInspection() {
+            editingInspectionId = null;
+            document.getElementById('inspectionForm').reset();
+            uploadedEvidence = [];
+            renderEvidenceGrid();
+            clearSignature('inspector');
+            clearSignature('supervisor');
+            
+            document.getElementById('form-mode-badge').innerText = "Mode Baru";
+            document.getElementById('doc-id-display').innerText = "ID: AUTO";
+
+            // Set current date
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('inspectionDate').value = now.toISOString().slice(0, 16);
+
+            renderDynamicInspectionForm();
+            switchTab('inspection-form');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            // Collect Form Values
+            const panelName = document.getElementById('panelName').value;
+            const panelLocation = document.getElementById('panelLocation').value;
+            const panelType = document.getElementById('panelType').value;
+            const ratedVoltage = document.getElementById('ratedVoltage').value;
+            const inspectorName = document.getElementById('inspectorName').value;
+            const inspectionDate = document.getElementById('inspectionDate').value;
+            const overallNotes = document.getElementById('overallNotes').value;
+            const overallStatus = document.getElementById('overallStatus').value;
+            const supervisorName = document.getElementById('supervisorName').value;
+
+            // Collect Inspection Items Details
+            const itemResults = masterItems.map(item => {
+                let statusVal = 'BAIK';
+                let measuredVal = '';
+                let note = document.getElementById(`note_${item.id}`)?.value || '';
+
+                if (item.inputType === 'STATUS') {
+                    const radios = document.getElementsByName(`check_${item.id}`);
+                    for (let r of radios) {
+                        if (r.checked) statusVal = r.value;
+                    }
+                } else {
+                    measuredVal = document.getElementById(`value_${item.id}`)?.value || '';
+                    statusVal = document.getElementById(`status_val_${item.id}`)?.value || 'BAIK';
+                }
+
+                return {
+                    itemId: item.id,
+                    category: item.category,
+                    name: item.name,
+                    standard: item.standard,
+                    inputType: item.inputType,
+                    status: statusVal,
+                    measuredValue: measuredVal,
+                    note: note
+                };
+            });
+
+            // Get Signatures Data
+            const inspectorSigData = canvasInspector.toDataURL('image/png');
+            const supervisorSigData = canvasSupervisor.toDataURL('image/png');
+
+            const recordId = editingInspectionId ? editingInspectionId : 'INSP-' + Date.now().toString().slice(-6);
+
+            const recordData = {
+                id: recordId,
+                panelName,
+                panelLocation,
+                panelType,
+                ratedVoltage,
+                inspectorName,
+                supervisorName,
+                inspectionDate,
+                overallNotes,
+                overallStatus,
+                itemResults,
+                evidencePhotos: [...uploadedEvidence],
+                inspectorSig: inspectorSigData,
+                supervisorSig: supervisorSigData,
+                createdAt: new Date().toISOString()
+            };
+
+            if (editingInspectionId) {
+                const idx = inspectionHistory.findIndex(x => x.id === editingInspectionId);
+                if (idx !== -1) inspectionHistory[idx] = recordData;
+                showToast('Laporan inspeksi diperbarui!', 'success');
+            } else {
+                inspectionHistory.unshift(recordData);
+                showToast('Laporan inspeksi baru disimpan!', 'success');
+            }
+
+            localStorage.setItem('eleccheck_inspections', JSON.stringify(inspectionHistory));
+            updateStats();
+            renderHistoryTable();
+            switchTab('dashboard');
+        }
+
+        function renderHistoryTable(filteredData = null) {
+            const tbody = document.getElementById('inspection-table-body');
+            const emptyState = document.getElementById('history-empty-state');
+            tbody.innerHTML = '';
+
+            const list = filteredData || inspectionHistory;
+
+            if (list.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            list.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                let statusBadge = '';
+                if (rec.overallStatus === 'LULUS') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-circle-check mr-1"></i>LULUS</span>`;
+                } else if (rec.overallStatus === 'PERHATIAN') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i>CATATAN</span>`;
+                } else {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700"><i class="fa-solid fa-circle-xmark mr-1"></i>BAHAYA</span>`;
+                }
+
+                const dateStr = new Date(rec.inspectionDate).toLocaleString('id-ID', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-bold text-slate-900">${rec.id}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-slate-800">${rec.panelName}</div>
+                        <div class="text-xs text-slate-400">${rec.panelType || 'Panel Elektrikal'}</div>
+                    </td>
+                    <td class="p-4 text-xs font-medium text-slate-600">${rec.panelLocation}</td>
+                    <td class="p-4 text-xs text-slate-500">${dateStr}</td>
+                    <td class="p-4 text-xs font-semibold text-slate-700">${rec.inspectorName}</td>
+                    <td class="p-4 text-center">${statusBadge}</td>
+                    <td class="p-4 text-center">
+                        <span class="text-xs font-bold text-slate-600"><i class="fa-solid fa-image text-slate-400 mr-1"></i>${rec.evidencePhotos ? rec.evidencePhotos.length : 0}</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="viewInspectionDetail('${rec.id}')" title="Lihat Detail" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button onclick="editInspectionRecord('${rec.id}')" title="Edit Data" class="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="generatePDFReport('${rec.id}')" title="Cetak / PDF" class="p-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </button>
+                            <button onclick="deleteInspectionRecord('${rec.id}')" title="Hapus" class="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterInspectionList() {
+            const search = document.getElementById('search-history').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+
+            const filtered = inspectionHistory.filter(rec => {
+                const matchSearch = rec.panelName.toLowerCase().includes(search) ||
+                                    rec.panelLocation.toLowerCase().includes(search) ||
+                                    rec.inspectorName.toLowerCase().includes(search) ||
+                                    rec.id.toLowerCase().includes(search);
+                const matchStatus = status === 'ALL' || rec.overallStatus === status;
+                return matchSearch && matchStatus;
+            });
+
+            renderHistoryTable(filtered);
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = inspectionHistory.length;
+            document.getElementById('stat-pass').innerText = inspectionHistory.filter(i => i.overallStatus === 'LULUS').length;
+            document.getElementById('stat-warning').innerText = inspectionHistory.filter(i => i.overallStatus === 'PERHATIAN').length;
+            document.getElementById('stat-fail').innerText = inspectionHistory.filter(i => i.overallStatus === 'BAHAYA').length;
+        }
+
+        function viewInspectionDetail(id) {
+            const rec = inspectionHistory.find(r => r.id === id);
+            if (!rec) return;
+
+            document.getElementById('detailModalTitle').innerText = rec.panelName;
+            document.getElementById('detailModalSub').innerText = `ID Dokumen: ${rec.id} | Tanggal: ${new Date(rec.inspectionDate).toLocaleString('id-ID')}`;
+            document.getElementById('detailModalPdfBtn').onclick = () => generatePDFReport(rec.id);
+
+            let itemsDetailHtml = rec.itemResults.map(item => `
+                <tr class="border-b border-slate-100 text-xs">
+                    <td class="p-2 font-semibold">${item.name}</td>
+                    <td class="p-2 text-slate-500">${item.standard || '-'}</td>
+                    <td class="p-2 font-mono">${item.measuredValue || '-'}</td>
+                    <td class="p-2 font-bold ${item.status === 'BAIK' ? 'text-emerald-600' : item.status === 'PERHATIAN' ? 'text-amber-600' : 'text-red-600'}">${item.status}</td>
+                    <td class="p-2 text-slate-500">${item.note || '-'}</td>
+                </tr>
+            `).join('');
+
+            let photosHtml = rec.evidencePhotos && rec.evidencePhotos.length > 0 ? rec.evidencePhotos.map(p => `
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                    <img src="${p.dataUrl}" class="w-full h-32 object-cover">
+                    <div class="p-1.5 text-[11px] text-slate-600 truncate">${p.caption || 'Evidence'}</div>
+                </div>
+            `).join('') : '<p class="text-xs text-slate-400 italic">Tidak ada foto evidence.</p>';
+
+            document.getElementById('detailModalContent').innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                    <div><span class="text-slate-400">Lokasi:</span><p class="font-bold text-slate-800">${rec.panelLocation}</p></div>
+                    <div><span class="text-slate-400">Tipe Panel:</span><p class="font-bold text-slate-800">${rec.panelType || '-'}</p></div>
+                    <div><span class="text-slate-400">Inspektor:</span><p class="font-bold text-slate-800">${rec.inspectorName}</p></div>
+                    <div><span class="text-slate-400">Status Akhir:</span><p class="font-bold ${rec.overallStatus === 'LULUS' ? 'text-emerald-600' : 'text-red-600'}">${rec.overallStatus}</p></div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-2">Rincian Hasil Checklist</h4>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-100 text-slate-700 text-[11px] uppercase">
+                                <tr>
+                                    <th class="p-2">Item Parameter</th>
+                                    <th class="p-2">Standar</th>
+                                    <th class="p-2">Hasil Ukur</th>
+                                    <th class="p-2">Status</th>
+                                    <th class="p-2">Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsDetailHtml}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-2">Dokumentasi Foto Evidence</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${photosHtml}</div>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <h4 class="font-bold text-xs text-slate-700 mb-1">Catatan/Rekomendasi Inspektor:</h4>
+                    <p class="text-xs text-slate-600">${rec.overallNotes || 'Tidak ada catatan khusus.'}</p>
+                </div>
+            `;
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        function editInspectionRecord(id) {
+            const rec = inspectionHistory.find(r => r.id === id);
+            if (!rec) return;
+
+            editingInspectionId = rec.id;
+            document.getElementById('form-mode-badge').innerText = "Edit Mode";
+            document.getElementById('doc-id-display').innerText = `ID: ${rec.id}`;
+
+            document.getElementById('panelName').value = rec.panelName;
+            document.getElementById('panelLocation').value = rec.panelLocation;
+            document.getElementById('panelType').value = rec.panelType || 'LVT (Low Voltage Transformer)';
+            document.getElementById('ratedVoltage').value = rec.ratedVoltage || '';
+            document.getElementById('inspectorName').value = rec.inspectorName;
+            document.getElementById('inspectionDate').value = rec.inspectionDate;
+            document.getElementById('overallNotes').value = rec.overallNotes || '';
+            document.getElementById('overallStatus').value = rec.overallStatus;
+            document.getElementById('supervisorName').value = rec.supervisorName || '';
+
+            // Dynamic Form Populate
+            renderDynamicInspectionForm();
+            rec.itemResults.forEach(item => {
+                if (item.inputType === 'STATUS') {
+                    const radios = document.getElementsByName(`check_${item.itemId}`);
+                    for (let r of radios) {
+                        if (r.value === item.status) r.checked = true;
+                    }
+                } else {
+                    const valInput = document.getElementById(`value_${item.itemId}`);
+                    const statusSel = document.getElementById(`status_val_${item.itemId}`);
+                    if (valInput) valInput.value = item.measuredValue || '';
+                    if (statusSel) statusSel.value = item.status || 'BAIK';
+                }
+                const noteInput = document.getElementById(`note_${item.itemId}`);
+                if (noteInput) noteInput.value = item.note || '';
+            });
+
+            // Evidence Photos
+            uploadedEvidence = rec.evidencePhotos ? [...rec.evidencePhotos] : [];
+            renderEvidenceGrid();
+
+            switchTab('inspection-form');
+        }
+
+        function deleteInspectionRecord(id) {
+            if (confirm(`Apakah Anda yakin ingin menghapus laporan ${id}?`)) {
+                inspectionHistory = inspectionHistory.filter(r => r.id !== id);
+                localStorage.setItem('eleccheck_inspections', JSON.stringify(inspectionHistory));
+                updateStats();
+                renderHistoryTable();
+                showToast('Laporan berhasil dihapus', 'info');
+            }
+        }
+
+        function saveSettings() {
+            companySettings = {
+                name: document.getElementById('settingCompanyName').value,
+                subTitle: document.getElementById('settingSubTitle').value,
+                address: document.getElementById('settingAddress').value
+            };
+            localStorage.setItem('eleccheck_settings', JSON.stringify(companySettings));
+            showToast('Pengaturan Kop Laporan PDF Disimpan!', 'success');
+        }
+
+
+        function generatePDFReport(id) {
+            const rec = inspectionHistory.find(r => r.id === id);
+            if (!rec) {
+                showToast('Laporan tidak ditemukan', 'error');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            // Colors
+            const darkBlue = [15, 23, 42];
+            const amberColor = [245, 158, 11];
+            const grayText = [71, 85, 105];
+
+            // HEADER KOP PERUSAHAAN
+            doc.setFillColor(...darkBlue);
+            doc.rect(0, 0, pageWidth, 28, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.text(companySettings.name.toUpperCase(), 14, 12);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(203, 213, 225);
+            doc.text(companySettings.subTitle, 14, 18);
+            doc.text(companySettings.address, 14, 23);
+
+            // REPORT TITLE & STATUS BADGE
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            doc.setTextColor(...darkBlue);
+            doc.text("LAPORAN INSPEKSI PANEL ELEKTRIKAL", 14, 38);
+
+            // Status Stamp Box
+            let statusText = rec.overallStatus;
+            let badgeBg = [16, 185, 129]; // Green
+            if (rec.overallStatus === 'PERHATIAN') badgeBg = [245, 158, 11];
+            if (rec.overallStatus === 'BAHAYA') badgeBg = [220, 38, 38];
+
+            doc.setFillColor(...badgeBg);
+            doc.roundedRect(pageWidth - 50, 32, 36, 10, 2, 2, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text(statusText, pageWidth - 32, 38.5, { align: 'center' });
+
+            // INFORMATION TABLE
+            const formattedDate = new Date(rec.inspectionDate).toLocaleString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            doc.autoTable({
+                startY: 45,
+                margin: { left: 14, right: 14 },
+                theme: 'plain',
+                styles: { fontSize: 8.5, cellPadding: 1.5, textColor: [30, 41, 59] },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 32, textColor: grayText },
+                    1: { cellWidth: 60 },
+                    2: { fontStyle: 'bold', cellWidth: 32, textColor: grayText },
+                    3: { cellWidth: 58 }
+                },
+                body: [
+                    ['No. Laporan:', rec.id, 'Tanggal Inspeksi:', formattedDate],
+                    ['Nama Panel:', rec.panelName, 'Inspektor:', rec.inspectorName],
+                    ['Lokasi / Area:', rec.panelLocation, 'Rating Tegangan:', rec.ratedVoltage || '-'],
+                    ['Tipe Panel:', rec.panelType || 'Panel Elektrikal', 'Supervisor:', rec.supervisorName || '-']
+                ]
+            });
+
+            // CHECKLIST DETAILS TABLE
+            const tableRows = [];
+            let currentCat = '';
+
+            rec.itemResults.forEach((item, idx) => {
+                if (item.category !== currentCat) {
+                    currentCat = item.category;
+                    // Category Header Row
+                    tableRows.push([{ content: currentCat, colSpan: 5, styles: { fontStyle: 'bold', fillColor: [241, 245, 249], textColor: [15, 23, 42] } }]);
+                }
+
+                const displayResult = item.inputType === 'STATUS' ? item.status : `${item.measuredValue || '-'} (${item.status})`;
+                tableRows.push([
+                    (idx + 1).toString(),
+                    item.name,
+                    item.standard || '-',
+                    displayResult,
+                    item.note || '-'
+                ]);
+            });
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 4,
+                margin: { left: 14, right: 14 },
+                head: [['No', 'Parameter Check', 'Standar Acuan', 'Hasil Inspeksi', 'Catatan/Keterangan']],
+                body: tableRows,
+                theme: 'grid',
+                headStyles: { fillColor: darkBlue, textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+                styles: { fontSize: 8, cellPadding: 2, textColor: [30, 41, 59] },
+                columnStyles: {
+                    0: { cellWidth: 10, halign: 'center' },
+                    1: { cellWidth: 55 },
+                    2: { cellWidth: 45 },
+                    3: { cellWidth: 35, fontStyle: 'bold' },
+                    4: { cellWidth: 37 }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 3) {
+                        const val = data.cell.raw;
+                        if (typeof val === 'string' && (val.includes('RUSAK') || val.includes('BAHAYA') || val.includes('ABNORMAL'))) {
+                            data.cell.styles.textColor = [220, 38, 38];
+                        } else if (typeof val === 'string' && val.includes('PERHATIAN')) {
+                            data.cell.styles.textColor = [217, 119, 6];
+                        } else if (typeof val === 'string' && (val.includes('BAIK') || val.includes('NORMAL'))) {
+                            data.cell.styles.textColor = [16, 185, 129];
+                        }
+                    }
+                }
+            });
+
+            let currentY = doc.lastAutoTable.finalY + 6;
+
+            // OVERALL NOTES BOX
+            if (currentY > 240) {
+                doc.addPage();
+                currentY = 20;
+            }
+
+            doc.setFillColor(248, 250, 252);
+            doc.setDrawColor(226, 232, 240);
+            doc.roundedRect(14, currentY, pageWidth - 28, 18, 1, 1, 'FD');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.5);
+            doc.setTextColor(...darkBlue);
+            doc.text("KESIMPULAN & REKOMENDASI TINDAPAN:", 17, currentY + 5);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(...grayText);
+            const splitNotes = doc.splitTextToSize(rec.overallNotes || 'Kondisi panel telah diinspeksi secara menyeluruh sesuai standar K3 listrik.', pageWidth - 34);
+            doc.text(splitNotes, 17, currentY + 10);
+
+            currentY += 24;
+
+            // EVIDENCE PHOTOS IN PDF
+            if (rec.evidencePhotos && rec.evidencePhotos.length > 0) {
+                if (currentY > 210) {
+                    doc.addPage();
+                    currentY = 20;
+                }
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(...darkBlue);
+                doc.text("DOKUMENTASI FOTO EVIDENCE LAPANGAN:", 14, currentY);
+                currentY += 4;
+
+                let imgX = 14;
+                let imgY = currentY;
+                const imgWidth = 42;
+                const imgHeight = 32;
+
+                rec.evidencePhotos.slice(0, 4).forEach((img, index) => {
+                    if (imgX + imgWidth > pageWidth - 14) {
+                        imgX = 14;
+                        imgY += imgHeight + 8;
+                    }
+                    try {
+                        doc.addImage(img.dataUrl, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+                        doc.setFontSize(7);
+                        doc.setTextColor(100, 116, 139);
+                        doc.text(img.caption ? img.caption.substring(0, 22) : `Foto ${index+1}`, imgX, imgY + imgHeight + 3);
+                    } catch (err) {
+                        console.error('Failed to add image to PDF', err);
+                    }
+                    imgX += imgWidth + 5;
+                });
+
+                currentY = imgY + imgHeight + 10;
+            }
+
+            // SIGNATURE BLOCK
+            if (currentY > 230) {
+                doc.addPage();
+                currentY = 25;
+            }
+
+            const sigY = currentY + 5;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...darkBlue);
+
+            // Left Block: Inspector
+            doc.text("Diinspeksi Oleh (Teknisi):", 25, sigY);
+            if (rec.inspectorSig) {
+                try {
+                    doc.addImage(rec.inspectorSig, 'PNG', 22, sigY + 2, 40, 18);
+                } catch(e){}
+            }
+            doc.line(20, sigY + 22, 75, sigY + 22);
+            doc.text(rec.inspectorName, 25, sigY + 26);
+
+            // Right Block: Supervisor
+            doc.text("Disetujui Oleh (Supervisor):", pageWidth - 75, sigY);
+            if (rec.supervisorSig) {
+                try {
+                    doc.addImage(rec.supervisorSig, 'PNG', pageWidth - 78, sigY + 2, 40, 18);
+                } catch(e){}
+            }
+            doc.line(pageWidth - 80, sigY + 22, pageWidth - 25, sigY + 22);
+            doc.text(rec.supervisorName || 'Supervisor / Manager', pageWidth - 75, sigY + 26);
+
+            // Save PDF
+            doc.save(`Laporan_Inspeksi_${rec.panelName.replace(/[^a-zA-Z0-9]/g, '_')}_${rec.id}.pdf`);
+            showToast('Laporan PDF berhasil diunduh!', 'success');
+        }
+    </script>
+</body>
+</html>
