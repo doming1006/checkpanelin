@@ -147,8 +147,8 @@
 
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kondisi Baik / OKE</p>
-                        <h3 id="stat-OKE" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kondisi Baik / Pass</p>
+                        <h3 id="stat-pass" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
                     </div>
                     <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
                         <i class="fa-solid fa-circle-check"></i>
@@ -456,7 +456,12 @@
                 <input type="hidden" id="editItemId">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Parameter *</label>
-                    <input type="text" id="itemCategory" required placeholder="Contoh: A. Kondisi Fisik & Enklosur" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <div class="space-y-2">
+                        <select id="itemCategorySelect" onchange="handleCategorySelectChange(this)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <input type="text" id="itemCategoryCustom" placeholder="Atau ketik kategori baru di sini..." class="hidden w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Pertanyaan / Parameter Pemeriksaan *</label>
@@ -622,10 +627,10 @@
             canvas.addEventListener('mouseleave', stopDraw);
 
             // Touch events for mobile/tablet
-            canvas.addEventListener('touchstart', startDraw, { OKEive: false });
-            canvas.addEventListener('touchmove', draw, { OKEive: false });
-            canvas.addEventListener('touchend', stopDraw, { OKEive: false });
-            canvas.addEventListener('touchcancel', stopDraw, { OKEive: false });
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw, { passive: false });
+            canvas.addEventListener('touchcancel', stopDraw, { passive: false });
         }
 
         function resizeCanvas() {
@@ -739,7 +744,7 @@
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
                                     <label class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">
-                                        <input type="radio" name="check_${item.id}" value="OKE" checked class="accent-emerald-600"> OKE
+                                        <input type="radio" name="check_${item.id}" value="PASS" checked class="accent-emerald-600"> Pass
                                     </label>
                                     <label class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">
                                         <input type="radio" name="check_${item.id}" value="WARN" class="accent-amber-600"> Perhatian
@@ -797,7 +802,7 @@
                     id: item.id,
                     category: item.category,
                     question: item.question,
-                    status: selectedRadio ? selectedRadio.value : 'OKE'
+                    status: selectedRadio ? selectedRadio.value : 'PASS'
                 });
             });
 
@@ -844,11 +849,11 @@
 
             // Update Stats
             document.getElementById('stat-total').textContent = inspectionHistory.length;
-            const OKECount = inspectionHistory.filter(r => r.overallStatus === 'LULUS').length;
+            const passCount = inspectionHistory.filter(r => r.overallStatus === 'LULUS').length;
             const warnCount = inspectionHistory.filter(r => r.overallStatus === 'PERHATIAN').length;
             const failCount = inspectionHistory.filter(r => r.overallStatus === 'BAHAYA').length;
 
-            document.getElementById('stat-OKE').textContent = OKECount;
+            document.getElementById('stat-pass').textContent = passCount;
             document.getElementById('stat-warning').textContent = warnCount;
             document.getElementById('stat-fail').textContent = failCount;
 
@@ -964,7 +969,12 @@
         function openAddItemModal() {
             document.getElementById('modalItemTitle').textContent = 'Tambah Parameter CheckList';
             document.getElementById('editItemId').value = '';
-            document.getElementById('itemCategory').value = '1. Kondisi Fisik & Enklosur';
+            
+            populateCategoryDropdown();
+            document.getElementById('itemCategorySelect').value = '';
+            document.getElementById('itemCategoryCustom').value = '';
+            document.getElementById('itemCategoryCustom').classList.remove('hidden');
+
             document.getElementById('itemQuestion').value = '';
             document.getElementById('itemModal').classList.remove('hidden');
         }
@@ -974,9 +984,55 @@
             if (!item) return;
             document.getElementById('modalItemTitle').textContent = 'Edit Parameter CheckList';
             document.getElementById('editItemId').value = item.id;
-            document.getElementById('itemCategory').value = item.category;
+            
+            populateCategoryDropdown();
+            const selectEl = document.getElementById('itemCategorySelect');
+            const customEl = document.getElementById('itemCategoryCustom');
+            
+            // Check if item's category exists in dropdown options
+            let exists = false;
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value === item.category) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (exists) {
+                selectEl.value = item.category;
+                customEl.value = '';
+                customEl.classList.add('hidden');
+            } else {
+                selectEl.value = 'CUSTOM';
+                customEl.value = item.category;
+                customEl.classList.remove('hidden');
+            }
+
             document.getElementById('itemQuestion').value = item.question;
             document.getElementById('itemModal').classList.remove('hidden');
+        }
+
+        function populateCategoryDropdown() {
+            const selectEl = document.getElementById('itemCategorySelect');
+            const categories = [...new Set(masterItems.map(i => i.category))];
+            
+            selectEl.innerHTML = `
+                <option value="">-- Pilih Kategori yang Ada --</option>
+                ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                <option value="CUSTOM">+ Ketik Kategori Baru...</option>
+            `;
+        }
+
+        function handleCategorySelectChange(select) {
+            const customInput = document.getElementById('itemCategoryCustom');
+            if (select.value === 'CUSTOM') {
+                customInput.classList.remove('hidden');
+                customInput.value = '';
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                customInput.value = select.value;
+            }
         }
 
         function closeItemModal() {
@@ -986,8 +1042,20 @@
         function saveMasterItem(e) {
             e.preventDefault();
             const id = document.getElementById('editItemId').value;
-            const category = document.getElementById('itemCategory').value.trim();
+            const selectEl = document.getElementById('itemCategorySelect');
+            const customEl = document.getElementById('itemCategoryCustom');
+            
+            let category = selectEl.value;
+            if (category === 'CUSTOM' || !category) {
+                category = customEl.value.trim();
+            }
+
             const question = document.getElementById('itemQuestion').value.trim();
+
+            if (!category) {
+                alert('Silakan pilih atau masukkan kategori.');
+                return;
+            }
 
             if (id) {
                 const item = masterItems.find(i => i.id === id);
@@ -1115,7 +1183,7 @@
                 index + 1,
                 item.category,
                 item.question,
-                item.status === 'OKE' ? 'OKE (Baik)' : (item.status === 'WARN' ? 'PERHATIAN' : 'BAHAYA / GAGAL')
+                item.status === 'PASS' ? 'PASS (Baik)' : (item.status === 'WARN' ? 'PERHATIAN' : 'BAHAYA / GAGAL')
             ]);
 
             doc.autoTable({
