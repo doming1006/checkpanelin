@@ -57,9 +57,9 @@
                             <!-- Shield Background -->
                             <path d="M20 15 C20 15, 45 10, 70 15 C70 45, 65 70, 45 82 C25 70, 20 45, 20 15 Z" fill="#0b1e36" stroke="#1d4ed8" stroke-width="2"/>
                             <!-- Indicator bars inside shield -->
-                            <rect x="30" y="28" width="4" h="10" fill="#f59e0b" rx="1"/>
-                            <rect x="37" y="24" width="4" h="14" fill="#f59e0b" rx="1"/>
-                            <rect x="44" y="21" width="4" h="17" fill="#f59e0b" rx="1"/>
+                            <rect x="30" y="28" width="4" height="10" fill="#f59e0b" rx="1"/>
+                            <rect x="37" y="24" width="4" height="14" fill="#f59e0b" rx="1"/>
+                            <rect x="44" y="21" width="4" height="17" fill="#f59e0b" rx="1"/>
                             <!-- Yellow Lightning Bolt -->
                             <path d="M56 10 L28 48 L43 48 L26 82 L64 38 L47 38 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1"/>
                             <!-- Text PANELIN -->
@@ -356,7 +356,9 @@
                                 <span class="text-xs font-bold text-slate-700 uppercase">1. Tanda Tangan Inspektor / Teknisi</span>
                                 <button type="button" onclick="clearSignature('inspector')" class="text-xs text-red-500 hover:underline">Reset Canvas</button>
                             </div>
-                            <canvas id="canvas-inspector" class="w-full h-32 bg-white border border-slate-300 rounded-lg cursor-crosshair touch-none"></canvas>
+                            <div class="relative w-full h-32 bg-white border border-slate-300 rounded-lg overflow-hidden">
+                                <canvas id="canvas-inspector" class="w-full h-full cursor-crosshair touch-none block"></canvas>
+                            </div>
                         </div>
 
                         <!-- Supervisor Signature -->
@@ -365,7 +367,9 @@
                                 <span class="text-xs font-bold text-slate-700 uppercase">2. Tanda Tangan Supervisor / Atasan</span>
                                 <button type="button" onclick="clearSignature('supervisor')" class="text-xs text-red-500 hover:underline">Reset Canvas</button>
                             </div>
-                            <canvas id="canvas-supervisor" class="w-full h-32 bg-white border border-slate-300 rounded-lg cursor-crosshair touch-none"></canvas>
+                            <div class="relative w-full h-32 bg-white border border-slate-300 rounded-lg overflow-hidden">
+                                <canvas id="canvas-supervisor" class="w-full h-full cursor-crosshair touch-none block"></canvas>
+                            </div>
                             <input type="text" id="supervisorName" placeholder="Nama Supervisor / Manager" class="w-full mt-2 px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-amber-500">
                         </div>
                     </div>
@@ -452,775 +456,441 @@
                 <input type="hidden" id="editItemId">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Parameter *</label>
-                    <input type="text" id="itemCategory" required list="categoryList" placeholder="Pilih atau tulis kategori baru..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500">
-                    <datalist id="categoryList">
-                        <option value="1. Pemeriksaan Fisik & Kebersihan Panel">
-                        <option value="2. Komponen Pengaman & Terminal Kabel">
-                        <option value="3. Pengukuran Tegangan & Arus Listrik">
-                        <option value="4. Pengujian Isolasi & Pentanahan (Grounding)">
-                        <option value="5. Indikator, Aksesoris & Suhu Ruang">
-                    </datalist>
+                    <input type="text" id="itemCategory" required placeholder="Contoh: A. Kondisi Fisik & Enklosur" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Items / Parameter Check *</label>
-                    <input type="text" id="itemName" required placeholder="Contoh: Kondisi Kekencangan Baut Busbar" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Pertanyaan / Parameter Pemeriksaan *</label>
+                    <input type="text" id="itemQuestion" required placeholder="Contoh: Kebersihan ruang dalam panel dari debu & kotoran" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Standar Acuan / SOP</label>
-                    <input type="text" id="itemStandard" placeholder="Contoh: Baut kencang (Torque K3) & tidak kendur" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tipe Input Lapangan</label>
-                    <select id="itemInputType" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 bg-white">
-                        <option value="STATUS">Pilihan Status (Baik / Perhatian / Rusak)</option>
-                        <option value="NUMBER">Nilai Angka / Pengukuran (Volt, Ampere, Ohm, °C)</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-                    <button type="button" onclick="closeItemModal()" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-amber-500 text-slate-950 rounded-xl text-xs font-bold">Simpan Parameter</button>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeItemModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg shadow">Simpan Item</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 2: DETAIL VIEW INSPECTION REPORT -->
-    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-lg" id="detailModalTitle">Detail Laporan Inspeksi Panel</h3>
-                    <p class="text-xs text-slate-400" id="detailModalSub">ID: -</p>
-                </div>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6" id="detailModalContent">
-                <!-- Dynamic Content -->
-            </div>
-            <div class="bg-slate-50 border-t border-slate-200 p-4 px-6 flex justify-between items-center">
-                <span class="text-xs text-slate-500">ElecCheck Pro Engine</span>
-                <div class="flex items-center gap-2">
-                    <button onclick="closeDetailModal()" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold">Tutup</button>
-                    <button id="detailModalPdfBtn" onclick="" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-file-pdf text-sm"></i> Download PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 transition-all duration-300 transform translate-y-20 opacity-0 z-50">
-        <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
-        <span id="toast-message" class="text-sm font-medium">Notifikasi</span>
-    </div>
-
-
+    <!-- Application JavaScript Logic -->
     <script>
-        // Default Checklist Master Data (Standard Electrical Panel SOP)
-        const DEFAULT_CHECKLIST = [
-            {
-                id: 'm1',
-                category: '1. Pemeriksaan Fisik & Kebersihan Panel',
-                name: 'Kondisi Enclosure / Box Panel & Cat',
-                standard: 'Bebas korosi, engsel pintu lancar, cat tidak mengelupas',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm2',
-                category: '1. Pemeriksaan Fisik & Kebersihan Panel',
-                name: 'Kebersihan Dalam Panel & Ventilasi',
-                standard: 'Bebas debu, jelaga, sarangga, & sampah material',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm3',
-                category: '1. Pemeriksaan Fisik & Kebersihan Panel',
-                name: 'Karet Seal Pintu & Locking System',
-                standard: 'Rapat, elastis, kunci dapat mengunci rapat',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm4',
-                category: '2. Komponen Pengaman & Terminal Kabel',
-                name: 'Kondisi Utama Breaker (MCCB/ACB/MCB)',
-                standard: 'Bebas tanda gosong, retak, mekanis switch lancar',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm5',
-                category: '2. Komponen Pengaman & Terminal Kabel',
-                name: 'Kekencangan Baut Terminal & Cable Lug',
-                standard: 'Terkunci kencang (Sesuai torque), tidak longgar',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm6',
-                category: '2. Komponen Pengaman & Terminal Kabel',
-                name: 'Kondisi Isolator & Busbar',
-                standard: 'Bebas kotoran konduktif, insulasi rapat, tak berbau gosong',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm7',
-                category: '3. Pengukuran Tegangan & Arus Listrik',
-                name: 'Tegangan Fasa ke Fasa (R-S, S-T, T-R)',
-                standard: 'Nominal 380V - 400V AC (Toleransi ± 5%)',
-                inputType: 'NUMBER'
-            },
-            {
-                id: 'm8',
-                category: '3. Pengukuran Tegangan & Arus Listrik',
-                name: 'Tegangan Fasa ke Netral (R-N, S-N, T-N)',
-                standard: 'Nominal 220V - 230V AC',
-                inputType: 'NUMBER'
-            },
-            {
-                id: 'm9',
-                category: '3. Pengukuran Tegangan & Arus Listrik',
-                name: 'Beban Arus Maksimum (R, S, T, N)',
-                standard: 'Tidak melebihi Kapasitas Nominal Breaker (Ampere)',
-                inputType: 'NUMBER'
-            },
-            {
-                id: 'm10',
-                category: '4. Pengujian Isolasi & Pentanahan (Grounding)',
-                name: 'Resistansi Isolasi Fasa-Fasa & Fasa-Ground',
-                standard: 'Minimal > 1 MΩ (MegaOhm)',
-                inputType: 'NUMBER'
-            },
-            {
-                id: 'm11',
-                category: '4. Pengujian Isolasi & Pentanahan (Grounding)',
-                name: 'Nilai Tahanan Pentanahan (Grounding Test)',
-                standard: 'Standar PUIL < 5.0 Ohm',
-                inputType: 'NUMBER'
-            },
-            {
-                id: 'm12',
-                category: '5. Indikator, Aksesoris & Suhu Ruang',
-                name: 'Lampu Indikator (R-S-T) & Volt-Ampere Meter',
-                standard: 'Menyala terang, meter membaca akurat',
-                inputType: 'STATUS'
-            },
-            {
-                id: 'm13',
-                category: '5. Indikator, Aksesoris & Suhu Ruang',
-                name: 'Exhaust Fan Panel & Thermostat / Heater',
-                standard: 'Berputar halus, kipas bersih, fungsi otomatis aktif',
-                inputType: 'STATUS'
-            }
+        let currentTab = 'dashboard';
+        
+        // Default checklist master template
+        const defaultMasterItems = [
+            { id: 'm1', category: '1. Kondisi Fisik & Enklosur', question: 'Kebersihan bodi panel luar dan dalam dari debu / kotoran' },
+            { id: 'm2', category: '1. Kondisi Fisik & Enklosur', question: 'Kondisi pintu panel, engsel, dan kunci / handle berfungsi normal' },
+            { id: 'm3', category: '1. Kondisi Fisik & Enklosur', question: 'Peredam / Gasket karet pintu rapat untuk mencegah debu/air' },
+            { id: 'm4', category: '1. Kondisi Fisik & Enklosur', question: 'Label peringatan tegangan tinggi (Danger Warning Sign) terpasang jelas' },
+            { id: 'm5', category: '2. Komponen & Kabel Power', question: 'Kekencangan baut terminal busbar dan kabel utama (tidak ada hot spot)' },
+            { id: 'm6', category: '2. Komponen & Kabel Power', question: 'Kondisi isolasi kabel dan warna fasa (R-S-T-N-PE) sesuai standar' },
+            { id: 'm7', category: '2. Komponen & Kabel Power', question: 'Kondisi MCCB / ACB / MCB tidak ada tanda terbakar atau leleh' },
+            { id: 'm8', category: '3. Sistem Grounding & Proteksi', question: 'Koneksi kabel grounding ke bodi panel dan elektroda tanah terhubung baik' },
+            { id: 'm9', category: '3. Sistem Grounding & Proteksi', question: 'Fungsi indikator lampu fasa (R, S, T) menyala normal' },
+            { id: 'm10', category: '4. Pengukuran & Parameter Operasional', question: 'Tegangan antar fasa (R-S, S-T, R-T) normal (± 380V)' },
+            { id: 'm11', category: '4. Pengukuran & Parameter Operasional', question: 'Tegangan fasa ke netral (R-N, S-N, T-N) normal (± 220V)' }
         ];
 
-        // Global State Variables
-        let masterItems = [];
-        let inspectionHistory = [];
-        let uploadedEvidence = [];
-        let editingInspectionId = null;
-        let companySettings = {
-            name: "PANELIN ELECTRIC - ELEKTRIKAL INDONESIA",
-            subTitle: "DEPARTEMEN MAINTENANCE & INSPEKSI PANEL ELEKTRIKAL",
-            address: "Kawasan Industri Terpadu, Jakarta - Indonesia | Telp: (021) 555-0199"
+        let masterItems = JSON.parse(localStorage.getItem('panel_master_items')) || defaultMasterItems;
+        let inspectionHistory = JSON.parse(localStorage.getItem('panel_inspection_history')) || [];
+        let companySettings = JSON.parse(localStorage.getItem('panel_company_settings')) || {
+            name: 'PANELIN ELECTRIC - ELEKTRIKAL INDONESIA',
+            subtitle: 'DEPARTEMEN MAINTENANCE & INSPEKSI PANEL ELEKTRIKAL',
+            address: 'Kawasan Industri Terpadu, Jakarta - Indonesia | Telp: (021) 555-0199'
         };
 
-        // Signature Canvas Drawing Logic Setup
-        let canvasInspector, canvasSupervisor;
-        let ctxInspector, ctxSupervisor;
-        let isDrawingInspector = false, isDrawingSupervisor = false;
+        let currentEvidenceImages = [];
+        let sigInspectorPad = null;
+        let sigSupervisorPad = null;
 
-        // Initialize Application
-        window.addEventListener('DOMContentLoaded', () => {
-            loadLocalStorageData();
-            setupSignatureCanvases();
-            renderMasterItemsCRUD();
-            renderDynamicInspectionForm();
-            renderHistoryTable();
-            updateStats();
+        // On DOM Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initSignatures();
+            renderDashboard();
+            renderMasterItems();
+            loadSettingsToForm();
             
-            // Set Default Inspection Date to Now
+            // Set current date time in inspection form
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('inspectionDate').value = now.toISOString().slice(0, 16);
         });
 
-        function loadLocalStorageData() {
-            // Master Items
-            const savedItems = localStorage.getItem('eleccheck_master_items');
-            if (savedItems) {
-                masterItems = JSON.parse(savedItems);
-            } else {
-                masterItems = [...DEFAULT_CHECKLIST];
-                localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
-            }
-
-            // Inspection History
-            const savedHistory = localStorage.getItem('eleccheck_inspections');
-            if (savedHistory) {
-                inspectionHistory = JSON.parse(savedHistory);
-            }
-
-            // Company Settings
-            const savedSettings = localStorage.getItem('eleccheck_settings');
-            if (savedSettings) {
-                companySettings = JSON.parse(savedSettings);
-                document.getElementById('settingCompanyName').value = companySettings.name;
-                document.getElementById('settingSubTitle').value = companySettings.subTitle;
-                document.getElementById('settingAddress').value = companySettings.address;
-            }
-        }
-
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-message');
-            const toastIcon = document.getElementById('toast-icon');
-
-            toastMsg.innerText = message;
-            if (type === 'success') {
-                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
-            } else if (type === 'error') {
-                toastIcon.className = "fa-solid fa-circle-xmark text-red-400";
-            } else {
-                toastIcon.className = "fa-solid fa-circle-info text-amber-400";
-            }
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
+        // Tab Navigation
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'text-amber-400');
                 btn.classList.add('text-slate-300');
             });
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.classList.add('bg-slate-800', 'text-amber-400');
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-300');
+                activeBtn.classList.add('bg-slate-800', 'text-amber-400');
+            }
+            currentTab = tabId;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Fix canvas rendering issue when switching to form tab
+            if (tabId === 'inspection-form') {
+                setTimeout(resizeCanvas, 50);
             }
         }
 
         function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
         }
 
-        function setupSignatureCanvases() {
-            canvasInspector = document.getElementById('canvas-inspector');
-            canvasSupervisor = document.getElementById('canvas-supervisor');
-
-            if (!canvasInspector || !canvasSupervisor) return;
-
-            // Resize canvas resolution
-            [canvasInspector, canvasSupervisor].forEach(canvas => {
-                canvas.width = canvas.offsetWidth;
-                canvas.height = canvas.offsetHeight;
-            });
-
-            ctxInspector = canvasInspector.getContext('2d');
-            ctxSupervisor = canvasSupervisor.getContext('2d');
-
-            [ctxInspector, ctxSupervisor].forEach(ctx => {
-                ctx.strokeStyle = "#0f172a";
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = "round";
-            });
-
-            // Event Listeners for Inspector
-            setupCanvasEvents(canvasInspector, ctxInspector, () => isDrawingInspector, (val) => isDrawingInspector = val);
-            // Event Listeners for Supervisor
-            setupCanvasEvents(canvasSupervisor, ctxSupervisor, () => isDrawingSupervisor, (val) => isDrawingSupervisor = val);
+        // Robust Signature Pad Implementation
+        function initSignatures() {
+            setupCanvas('canvas-inspector');
+            setupCanvas('canvas-supervisor');
         }
 
-        function setupCanvasEvents(canvas, ctx, getDrawing, setDrawing) {
-            function getPos(e) {
+        function setupCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            function resizeCanvasToDisplaySize() {
                 const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: clientX - rect.left, y: clientY - rect.top };
+                if (canvas.width !== rect.width || canvas.height !== rect.height) {
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 2.5;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                }
             }
 
-            canvas.addEventListener('mousedown', (e) => {
-                setDrawing(true);
-                const pos = getPos(e);
-                ctx.beginPath();
-                ctx.moveTo(pos.x, pos.y);
-            });
+            // Initial sizing
+            resizeCanvasToDisplaySize();
+            window.addEventListener('resize', resizeCanvasToDisplaySize);
 
-            canvas.addEventListener('mousemove', (e) => {
-                if (!getDrawing()) return;
-                const pos = getPos(e);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
-            });
+            function getCoordinates(e) {
+                const rect = canvas.getBoundingClientRect();
+                if (e.touches && e.touches[0]) {
+                    return {
+                        x: e.touches[0].clientX - rect.left,
+                        y: e.touches[0].clientY - rect.top
+                    };
+                }
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
 
-            window.addEventListener('mouseup', () => setDrawing(false));
-
-            // Touch support for phones
-            canvas.addEventListener('touchstart', (e) => {
-                setDrawing(true);
-                const pos = getPos(e);
-                ctx.beginPath();
-                ctx.moveTo(pos.x, pos.y);
+            function startDraw(e) {
                 e.preventDefault();
-            });
+                isDrawing = true;
+                const coords = getCoordinates(e);
+                lastX = coords.x;
+                lastY = coords.y;
+            }
 
-            canvas.addEventListener('touchmove', (e) => {
-                if (!getDrawing()) return;
-                const pos = getPos(e);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
+            function draw(e) {
+                if (!isDrawing) return;
                 e.preventDefault();
-            });
+                const coords = getCoordinates(e);
 
-            canvas.addEventListener('touchend', () => setDrawing(false));
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(coords.x, coords.y);
+                ctx.stroke();
+
+                lastX = coords.x;
+                lastY = coords.y;
+            }
+
+            function stopDraw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                isDrawing = false;
+            }
+
+            // Mouse events
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseleave', stopDraw);
+
+            // Touch events for mobile/tablet
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw, { passive: false });
+            canvas.addEventListener('touchcancel', stopDraw, { passive: false });
+        }
+
+        function resizeCanvas() {
+            ['canvas-inspector', 'canvas-supervisor'].forEach(id => {
+                const canvas = document.getElementById(id);
+                if (canvas) {
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 2.5;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                }
+            });
         }
 
         function clearSignature(type) {
-            if (type === 'inspector') {
-                ctxInspector.clearRect(0, 0, canvasInspector.width, canvasInspector.height);
-            } else {
-                ctxSupervisor.clearRect(0, 0, canvasSupervisor.width, canvasSupervisor.height);
-            }
+            const canvas = document.getElementById(`canvas-${type}`);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        function renderMasterItemsCRUD() {
-            const container = document.getElementById('master-items-container');
-            container.innerHTML = '';
-
-            // Group items by category
-            const categories = {};
-            masterItems.forEach(item => {
-                if (!categories[item.category]) categories[item.category] = [];
-                categories[item.category].push(item);
-            });
-
-            if (Object.keys(categories).length === 0) {
-                container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-slate-500">Belum ada item checklist master. Silahkan tambahkan item baru.</div>`;
-                return;
-            }
-
-            for (const catName in categories) {
-                const groupEl = document.createElement('div');
-                groupEl.className = "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3";
-                
-                let itemsHtml = categories[catName].map(item => `
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 transition gap-3">
-                        <div class="space-y-0.5">
-                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">${item.inputType === 'NUMBER' ? 'Pengukuran / Nilai' : 'Status Check'}</span>
-                            <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
-                            <p class="text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i>Acuan: ${item.standard || '-'}</p>
-                        </div>
-                        <div class="flex items-center gap-2 self-end sm:self-center">
-                            <button onclick="editMasterItem('${item.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit
-                            </button>
-                            <button onclick="deleteMasterItem('${item.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition">
-                                <i class="fa-solid fa-trash"></i> Hapus
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-
-                groupEl.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                            <i class="fa-solid fa-folder text-amber-500"></i> ${catName}
-                        </h3>
-                        <span class="text-xs font-medium text-slate-500">${categories[catName].length} Items</span>
-                    </div>
-                    <div class="space-y-2">
-                        ${itemsHtml}
-                    </div>
-                `;
-                container.appendChild(groupEl);
-            }
+        function isCanvasBlank(canvas) {
+            if (!canvas) return true;
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            return canvas.toDataURL() === blank.toDataURL();
         }
 
-        function openAddItemModal() {
-            document.getElementById('editItemId').value = '';
-            document.getElementById('itemForm').reset();
-            document.getElementById('modalItemTitle').innerText = "Tambah Parameter CheckList Baru";
-            document.getElementById('itemModal').classList.remove('hidden');
-        }
+        // Image Upload Handler (Supports > 3 files correctly)
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
 
-        function closeItemModal() {
-            document.getElementById('itemModal').classList.add('hidden');
-        }
-
-        function editMasterItem(id) {
-            const item = masterItems.find(i => i.id === id);
-            if (!item) return;
-
-            document.getElementById('editItemId').value = item.id;
-            document.getElementById('itemCategory').value = item.category;
-            document.getElementById('itemName').value = item.name;
-            document.getElementById('itemStandard').value = item.standard;
-            document.getElementById('itemInputType').value = item.inputType;
-
-            document.getElementById('modalItemTitle').innerText = "Edit Parameter CheckList";
-            document.getElementById('itemModal').classList.remove('hidden');
-        }
-
-        function saveMasterItem(e) {
-            e.preventDefault();
-            const editId = document.getElementById('editItemId').value;
-            const category = document.getElementById('itemCategory').value;
-            const name = document.getElementById('itemName').value;
-            const standard = document.getElementById('itemStandard').value;
-            const inputType = document.getElementById('itemInputType').value;
-
-            if (editId) {
-                // Update
-                const idx = masterItems.findIndex(i => i.id === editId);
-                if (idx !== -1) {
-                    masterItems[idx] = { id: editId, category, name, standard, inputType };
-                    showToast('Item berhasil diperbarui!', 'success');
-                }
-            } else {
-                // Create
-                const newItem = {
-                    id: 'm_' + Date.now(),
-                    category,
-                    name,
-                    standard,
-                    inputType
-                };
-                masterItems.push(newItem);
-                showToast('Item baru ditambahkan!', 'success');
-            }
-
-            localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
-            closeItemModal();
-            renderMasterItemsCRUD();
-            renderDynamicInspectionForm();
-        }
-
-        function deleteMasterItem(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus item parameter ini dari template?')) {
-                masterItems = masterItems.filter(i => i.id !== id);
-                localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
-                renderMasterItemsCRUD();
-                renderDynamicInspectionForm();
-                showToast('Item berhasil dihapus', 'info');
-            }
-        }
-
-        function resetTemplateToDefault() {
-            if (confirm('Kembalikan semua item parameter ke standar awal pabrikan?')) {
-                masterItems = [...DEFAULT_CHECKLIST];
-                localStorage.setItem('eleccheck_master_items', JSON.stringify(masterItems));
-                renderMasterItemsCRUD();
-                renderDynamicInspectionForm();
-                showToast('Template direset ke standar', 'success');
-            }
-        }
-
-        function renderDynamicInspectionForm() {
-            const container = document.getElementById('dynamic-checklist-container');
-            container.innerHTML = '';
-
-            const categories = {};
-            masterItems.forEach(item => {
-                if (!categories[item.category]) categories[item.category] = [];
-                categories[item.category].push(item);
-            });
-
-            if (Object.keys(categories).length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-slate-500">Tidak ada parameter aktif. Tambahkan di menu 'Kelola Items (CRUD)'.</div>`;
-                return;
-            }
-
-            for (const catName in categories) {
-                const catCard = document.createElement('div');
-                catCard.className = "border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50";
-
-                let rowsHtml = categories[catName].map((item, index) => {
-                    if (item.inputType === 'STATUS') {
-                        return `
-                            <div class="p-4 bg-white border-b border-slate-100 last:border-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                <div class="md:w-1/2 space-y-0.5">
-                                    <span class="text-xs font-bold text-slate-400">#${index+1}</span>
-                                    <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
-                                    <p class="text-xs text-slate-500"><span class="font-semibold">Acuan:</span> ${item.standard || '-'}</p>
-                                </div>
-                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:w-1/2 justify-end">
-                                    <div class="inline-flex rounded-lg shadow-sm" role="group">
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="check_${item.id}" value="BAIK" checked class="peer hidden">
-                                            <span class="px-3 py-1.5 text-xs font-bold rounded-l-lg border border-slate-300 bg-white text-slate-600 peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-500 block transition">
-                                                <i class="fa-solid fa-check mr-1"></i>Baik
-                                            </span>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="check_${item.id}" value="PERHATIAN" class="peer hidden">
-                                            <span class="px-3 py-1.5 text-xs font-bold border-t border-b border-slate-300 bg-white text-slate-600 peer-checked:bg-amber-500 peer-checked:text-slate-950 peer-checked:border-amber-500 block transition">
-                                                <i class="fa-solid fa-exclamation-triangle mr-1"></i>Perhatian
-                                            </span>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="check_${item.id}" value="RUSAK" class="peer hidden">
-                                            <span class="px-3 py-1.5 text-xs font-bold rounded-r-lg border border-slate-300 bg-white text-slate-600 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 block transition">
-                                                <i class="fa-solid fa-xmark mr-1"></i>Rusak
-                                            </span>
-                                        </label>
-                                    </div>
-                                    <input type="text" id="note_${item.id}" placeholder="Catatan khusus..." class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs w-full sm:w-48 focus:ring-1 focus:ring-amber-500">
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // Value / Measurement Input
-                        return `
-                            <div class="p-4 bg-white border-b border-slate-100 last:border-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                <div class="md:w-1/2 space-y-0.5">
-                                    <span class="text-xs font-bold text-slate-400">#${index+1}</span>
-                                    <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
-                                    <p class="text-xs text-slate-500"><span class="font-semibold">Acuan:</span> ${item.standard || '-'}</p>
-                                </div>
-                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:w-1/2 justify-end">
-                                    <div class="relative flex-1 sm:w-40">
-                                        <input type="text" id="value_${item.id}" placeholder="Nilai Ukur..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-amber-500">
-                                    </div>
-                                    <select id="status_val_${item.id}" class="px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold bg-white">
-                                        <option value="BAIK">Status: NORMAL</option>
-                                        <option value="PERHATIAN">Status: ABKURANG/WARNI</option>
-                                        <option value="RUSAK">Status: ANOMALI/ABNORMAL</option>
-                                    </select>
-                                    <input type="text" id="note_${item.id}" placeholder="Keterangan..." class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs w-full sm:w-36 focus:ring-1 focus:ring-amber-500">
-                                </div>
-                            </div>
-                        `;
-                    }
-                }).join('');
-
-                catCard.innerHTML = `
-                    <div class="bg-slate-100 px-4 py-2.5 border-b border-slate-200">
-                        <h4 class="font-bold text-slate-800 text-sm">${catName}</h4>
-                    </div>
-                    <div>${rowsHtml}</div>
-                `;
-                container.appendChild(catCard);
-            }
-        }
-
-        function handleImageUpload(e) {
-            const files = Array.from(e.target.files);
-            if (!files.length) return;
-
-            files.forEach(file => {
+            Array.from(files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = function(evt) {
-                    uploadedEvidence.push({
-                        id: 'img_' + Date.now() + Math.random().toString(36).substr(2, 4),
-                        dataUrl: evt.target.result,
-                        caption: file.name
+                reader.onload = function(e) {
+                    currentEvidenceImages.push({
+                        id: 'img_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                        dataUrl: e.target.result,
+                        name: file.name
                     });
-                    renderEvidenceGrid();
+                    renderEvidencePreviews();
                 };
                 reader.readAsDataURL(file);
             });
-            e.target.value = '';
+
+            // Reset input so selecting same files works again if needed
+            event.target.value = '';
         }
 
-        function renderEvidenceGrid() {
+        function removeEvidenceImage(id) {
+            currentEvidenceImages = currentEvidenceImages.filter(img => img.id !== id);
+            renderEvidencePreviews();
+        }
+
+        function renderEvidencePreviews() {
             const grid = document.getElementById('evidence-preview-grid');
             const emptyMsg = document.getElementById('evidence-empty-msg');
             grid.innerHTML = '';
 
-            if (uploadedEvidence.length === 0) {
+            if (currentEvidenceImages.length === 0) {
                 emptyMsg.classList.remove('hidden');
                 return;
             }
             emptyMsg.classList.add('hidden');
 
-            uploadedEvidence.forEach((img, index) => {
-                const item = document.createElement('div');
-                item.className = "relative group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 shadow-sm";
-                item.innerHTML = `
-                    <img src="${img.dataUrl}" class="w-full h-28 object-cover">
-                    <button type="button" onclick="removeEvidence('${img.id}')" class="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-90 hover:opacity-100 transition shadow">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <div class="p-1.5">
-                        <input type="text" value="${img.caption}" onchange="updateEvidenceCaption('${img.id}', this.value)" placeholder="Keterangan foto..." class="w-full px-2 py-1 text-[11px] border border-slate-200 rounded focus:outline-none focus:border-amber-500">
+            currentEvidenceImages.forEach(img => {
+                const div = document.createElement('div');
+                div.className = 'relative group aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm';
+                div.innerHTML = `
+                    <img src="${img.dataUrl}" alt="Evidence" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button type="button" onclick="removeEvidenceImage('${img.id}')" class="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
                     </div>
                 `;
-                grid.appendChild(item);
+                grid.appendChild(div);
             });
         }
 
-        function removeEvidence(id) {
-            uploadedEvidence = uploadedEvidence.filter(i => i.id !== id);
-            renderEvidenceGrid();
+        // Generate Checklist Items in Form
+        function renderInspectionFormChecklist() {
+            const container = document.getElementById('dynamic-checklist-container');
+            container.innerHTML = '';
+
+            // Group by category
+            const grouped = {};
+            masterItems.forEach(item => {
+                if (!grouped[item.category]) {
+                    grouped[item.category] = [];
+                }
+                grouped[item.category].push(item);
+            });
+
+            Object.keys(grouped).forEach(cat => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'space-y-3';
+                sectionDiv.innerHTML = `
+                    <h4 class="text-sm font-bold text-slate-800 bg-slate-100 px-3 py-2 rounded-lg border-l-4 border-amber-500">${cat}</h4>
+                    <div class="space-y-3 pl-2">
+                        ${grouped[cat].map((item, idx) => `
+                            <div class="p-3 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="text-sm text-slate-700 flex-1">
+                                    <span class="font-semibold text-slate-400 mr-2">${idx+1}.</span>${item.question}
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <label class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">
+                                        <input type="radio" name="check_${item.id}" value="PASS" checked class="accent-emerald-600"> Pass
+                                    </label>
+                                    <label class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">
+                                        <input type="radio" name="check_${item.id}" value="WARN" class="accent-amber-600"> Perhatian
+                                    </label>
+                                    <label class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-100">
+                                        <input type="radio" name="check_${item.id}" value="FAIL" class="accent-red-600"> Bahaya
+                                    </label>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(sectionDiv);
+            });
         }
 
-        function updateEvidenceCaption(id, val) {
-            const idx = uploadedEvidence.findIndex(i => i.id === id);
-            if (idx !== -1) uploadedEvidence[idx].caption = val;
-        }
-
+        // Start New Inspection
         function startNewInspection() {
-            editingInspectionId = null;
             document.getElementById('inspectionForm').reset();
-            uploadedEvidence = [];
-            renderEvidenceGrid();
+            document.getElementById('form-mode-badge').textContent = 'Mode Baru';
+            document.getElementById('doc-id-display').textContent = 'ID: ' + 'INS-' + Date.now().toString().slice(-6);
+            currentEvidenceImages = [];
+            renderEvidencePreviews();
             clearSignature('inspector');
             clearSignature('supervisor');
+            renderInspectionFormChecklist();
             
-            document.getElementById('form-mode-badge').innerText = "Mode Baru";
-            document.getElementById('doc-id-display').innerText = "ID: AUTO";
-
-            // Set current date
+            // Set current date time
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('inspectionDate').value = now.toISOString().slice(0, 16);
 
-            renderDynamicInspectionForm();
             switchTab('inspection-form');
         }
 
+        // Handle Form Submit & Auto Redirect to Saved Checklist (Dashboard)
         function handleFormSubmit(e) {
             e.preventDefault();
 
-            // Collect Form Values
-            const panelName = document.getElementById('panelName').value;
-            const panelLocation = document.getElementById('panelLocation').value;
+            const panelName = document.getElementById('panelName').value.trim();
+            const panelLocation = document.getElementById('panelLocation').value.trim();
             const panelType = document.getElementById('panelType').value;
-            const ratedVoltage = document.getElementById('ratedVoltage').value;
-            const inspectorName = document.getElementById('inspectorName').value;
+            const ratedVoltage = document.getElementById('ratedVoltage').value.trim();
+            const inspectorName = document.getElementById('inspectorName').value.trim();
             const inspectionDate = document.getElementById('inspectionDate').value;
-            const overallNotes = document.getElementById('overallNotes').value;
+            const overallNotes = document.getElementById('overallNotes').value.trim();
             const overallStatus = document.getElementById('overallStatus').value;
-            const supervisorName = document.getElementById('supervisorName').value;
+            const supervisorName = document.getElementById('supervisorName').value.trim() || 'Supervisor On Duty';
 
-            // Collect Inspection Items Details
-            const itemResults = masterItems.map(item => {
-                let statusVal = 'BAIK';
-                let measuredVal = '';
-                let note = document.getElementById(`note_${item.id}`)?.value || '';
-
-                if (item.inputType === 'STATUS') {
-                    const radios = document.getElementsByName(`check_${item.id}`);
-                    for (let r of radios) {
-                        if (r.checked) statusVal = r.value;
-                    }
-                } else {
-                    measuredVal = document.getElementById(`value_${item.id}`)?.value || '';
-                    statusVal = document.getElementById(`status_val_${item.id}`)?.value || 'BAIK';
-                }
-
-                return {
-                    itemId: item.id,
+            // Gather checklist results
+            const checklistResults = [];
+            masterItems.forEach(item => {
+                const selectedRadio = document.querySelector(`input[name="check_${item.id}"]:checked`);
+                checklistResults.push({
+                    id: item.id,
                     category: item.category,
-                    name: item.name,
-                    standard: item.standard,
-                    inputType: item.inputType,
-                    status: statusVal,
-                    measuredValue: measuredVal,
-                    note: note
-                };
+                    question: item.question,
+                    status: selectedRadio ? selectedRadio.value : 'PASS'
+                });
             });
 
-            // Get Signatures Data
-            const inspectorSigData = canvasInspector.toDataURL('image/png');
-            const supervisorSigData = canvasSupervisor.toDataURL('image/png');
+            // Get signature data URLs
+            const canvasInsp = document.getElementById('canvas-inspector');
+            const canvasSup = document.getElementById('canvas-supervisor');
+            const inspectorSig = isCanvasBlank(canvasInsp) ? '' : canvasInsp.toDataURL();
+            const supervisorSig = isCanvasBlank(canvasSup) ? '' : canvasSup.toDataURL();
 
-            const recordId = editingInspectionId ? editingInspectionId : 'INSP-' + Date.now().toString().slice(-6);
+            const reportNo = 'LPR-' + Math.floor(100000 + Math.random() * 900000);
 
-            const recordData = {
-                id: recordId,
+            const newRecord = {
+                id: 'rec_' + Date.now(),
+                reportNo,
                 panelName,
                 panelLocation,
                 panelType,
                 ratedVoltage,
                 inspectorName,
-                supervisorName,
                 inspectionDate,
+                checklistResults,
+                evidenceImages: [...currentEvidenceImages],
                 overallNotes,
                 overallStatus,
-                itemResults,
-                evidencePhotos: [...uploadedEvidence],
-                inspectorSig: inspectorSigData,
-                supervisorSig: supervisorSigData,
+                supervisorName,
+                inspectorSig,
+                supervisorSig,
                 createdAt: new Date().toISOString()
             };
 
-            if (editingInspectionId) {
-                const idx = inspectionHistory.findIndex(x => x.id === editingInspectionId);
-                if (idx !== -1) inspectionHistory[idx] = recordData;
-                showToast('Laporan inspeksi diperbarui!', 'success');
-            } else {
-                inspectionHistory.unshift(recordData);
-                showToast('Laporan inspeksi baru disimpan!', 'success');
-            }
+            inspectionHistory.unshift(newRecord);
+            localStorage.setItem('panel_inspection_history', JSON.stringify(inspectionHistory));
 
-            localStorage.setItem('eleccheck_inspections', JSON.stringify(inspectionHistory));
-            updateStats();
-            renderHistoryTable();
+            // Automatically switch to dashboard (Saved Checklist view)
+            renderDashboard();
             switchTab('dashboard');
         }
 
-        function renderHistoryTable(filteredData = null) {
+        // Dashboard & History Rendering
+        function renderDashboard() {
             const tbody = document.getElementById('inspection-table-body');
             const emptyState = document.getElementById('history-empty-state');
             tbody.innerHTML = '';
 
-            const list = filteredData || inspectionHistory;
+            // Update Stats
+            document.getElementById('stat-total').textContent = inspectionHistory.length;
+            const passCount = inspectionHistory.filter(r => r.overallStatus === 'LULUS').length;
+            const warnCount = inspectionHistory.filter(r => r.overallStatus === 'PERHATIAN').length;
+            const failCount = inspectionHistory.filter(r => r.overallStatus === 'BAHAYA').length;
 
-            if (list.length === 0) {
+            document.getElementById('stat-pass').textContent = passCount;
+            document.getElementById('stat-warning').textContent = warnCount;
+            document.getElementById('stat-fail').textContent = failCount;
+
+            if (inspectionHistory.length === 0) {
                 emptyState.classList.remove('hidden');
                 return;
             }
             emptyState.classList.add('hidden');
 
-            list.forEach(rec => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
-
-                let statusBadge = '';
-                if (rec.overallStatus === 'LULUS') {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-circle-check mr-1"></i>LULUS</span>`;
-                } else if (rec.overallStatus === 'PERHATIAN') {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i>CATATAN</span>`;
-                } else {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700"><i class="fa-solid fa-circle-xmark mr-1"></i>BAHAYA</span>`;
+            inspectionHistory.forEach(record => {
+                let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                let badgeText = 'LULUS / BAIK';
+                if (record.overallStatus === 'PERHATIAN') {
+                    badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                    badgeText = 'DENGAN CATATAN';
+                } else if (record.overallStatus === 'BAHAYA') {
+                    badgeClass = 'bg-red-50 text-red-700 border-red-200';
+                    badgeText = 'BAHAYA / GAGAL';
                 }
 
-                const dateStr = new Date(rec.inspectionDate).toLocaleString('id-ID', {
-                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
-
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
                 tr.innerHTML = `
-                    <td class="p-4 font-mono font-bold text-slate-900">${rec.id}</td>
+                    <td class="p-4 font-mono font-bold text-slate-700">${record.reportNo}</td>
                     <td class="p-4">
-                        <div class="font-bold text-slate-800">${rec.panelName}</div>
-                        <div class="text-xs text-slate-400">${rec.panelType || 'Panel Elektrikal'}</div>
+                        <div class="font-bold text-slate-900">${record.panelName}</div>
+                        <div class="text-xs text-slate-400">${record.panelType}</div>
                     </td>
-                    <td class="p-4 text-xs font-medium text-slate-600">${rec.panelLocation}</td>
-                    <td class="p-4 text-xs text-slate-500">${dateStr}</td>
-                    <td class="p-4 text-xs font-semibold text-slate-700">${rec.inspectorName}</td>
-                    <td class="p-4 text-center">${statusBadge}</td>
+                    <td class="p-4 text-slate-600">${record.panelLocation}</td>
+                    <td class="p-4 text-xs text-slate-500">${record.inspectionDate.replace('T', ' ')}</td>
+                    <td class="p-4 text-slate-700">${record.inspectorName}</td>
                     <td class="p-4 text-center">
-                        <span class="text-xs font-bold text-slate-600"><i class="fa-solid fa-image text-slate-400 mr-1"></i>${rec.evidencePhotos ? rec.evidencePhotos.length : 0}</span>
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold border ${badgeClass}">${badgeText}</span>
                     </td>
-                    <td class="p-4 text-right">
-                        <div class="flex items-center justify-end gap-1.5">
-                            <button onclick="viewInspectionDetail('${rec.id}')" title="Lihat Detail" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                            <button onclick="editInspectionRecord('${rec.id}')" title="Edit Data" class="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs transition">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="generatePDFReport('${rec.id}')" title="Cetak / PDF" class="p-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg text-xs font-bold transition">
-                                <i class="fa-solid fa-file-pdf"></i>
-                            </button>
-                            <button onclick="deleteInspectionRecord('${rec.id}')" title="Hapus" class="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs transition">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
+                    <td class="p-4 text-center font-medium text-slate-700">${record.evidenceImages.length} Foto</td>
+                    <td class="p-4 text-right space-x-1">
+                        <button onclick="generatePDF('${record.id}')" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Download PDF Report">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </button>
+                        <button onclick="deleteRecord('${record.id}')" class="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition" title="Hapus Data">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1228,381 +898,347 @@
         }
 
         function filterInspectionList() {
-            const search = document.getElementById('search-history').value.toLowerCase();
-            const status = document.getElementById('filter-status').value;
+            const query = document.getElementById('search-history').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
 
-            const filtered = inspectionHistory.filter(rec => {
-                const matchSearch = rec.panelName.toLowerCase().includes(search) ||
-                                    rec.panelLocation.toLowerCase().includes(search) ||
-                                    rec.inspectorName.toLowerCase().includes(search) ||
-                                    rec.id.toLowerCase().includes(search);
-                const matchStatus = status === 'ALL' || rec.overallStatus === status;
-                return matchSearch && matchStatus;
-            });
+            const rows = document.querySelectorAll('#inspection-table-body tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesStatus = statusFilter === 'ALL' || row.textContent.includes(statusFilter);
 
-            renderHistoryTable(filtered);
-        }
-
-        function updateStats() {
-            document.getElementById('stat-total').innerText = inspectionHistory.length;
-            document.getElementById('stat-pass').innerText = inspectionHistory.filter(i => i.overallStatus === 'LULUS').length;
-            document.getElementById('stat-warning').innerText = inspectionHistory.filter(i => i.overallStatus === 'PERHATIAN').length;
-            document.getElementById('stat-fail').innerText = inspectionHistory.filter(i => i.overallStatus === 'BAHAYA').length;
-        }
-
-        function viewInspectionDetail(id) {
-            const rec = inspectionHistory.find(r => r.id === id);
-            if (!rec) return;
-
-            document.getElementById('detailModalTitle').innerText = rec.panelName;
-            document.getElementById('detailModalSub').innerText = `ID Dokumen: ${rec.id} | Tanggal: ${new Date(rec.inspectionDate).toLocaleString('id-ID')}`;
-            document.getElementById('detailModalPdfBtn').onclick = () => generatePDFReport(rec.id);
-
-            let itemsDetailHtml = rec.itemResults.map(item => `
-                <tr class="border-b border-slate-100 text-xs">
-                    <td class="p-2 font-semibold">${item.name}</td>
-                    <td class="p-2 text-slate-500">${item.standard || '-'}</td>
-                    <td class="p-2 font-mono">${item.measuredValue || '-'}</td>
-                    <td class="p-2 font-bold ${item.status === 'BAIK' ? 'text-emerald-600' : item.status === 'PERHATIAN' ? 'text-amber-600' : 'text-red-600'}">${item.status}</td>
-                    <td class="p-2 text-slate-500">${item.note || '-'}</td>
-                </tr>
-            `).join('');
-
-            let photosHtml = rec.evidencePhotos && rec.evidencePhotos.length > 0 ? rec.evidencePhotos.map(p => `
-                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-                    <img src="${p.dataUrl}" class="w-full h-32 object-cover">
-                    <div class="p-1.5 text-[11px] text-slate-600 truncate">${p.caption || 'Evidence'}</div>
-                </div>
-            `).join('') : '<p class="text-xs text-slate-400 italic">Tidak ada foto evidence.</p>';
-
-            document.getElementById('detailModalContent').innerHTML = `
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
-                    <div><span class="text-slate-400">Lokasi:</span><p class="font-bold text-slate-800">${rec.panelLocation}</p></div>
-                    <div><span class="text-slate-400">Tipe Panel:</span><p class="font-bold text-slate-800">${rec.panelType || '-'}</p></div>
-                    <div><span class="text-slate-400">Inspektor:</span><p class="font-bold text-slate-800">${rec.inspectorName}</p></div>
-                    <div><span class="text-slate-400">Status Akhir:</span><p class="font-bold ${rec.overallStatus === 'LULUS' ? 'text-emerald-600' : 'text-red-600'}">${rec.overallStatus}</p></div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-sm text-slate-900 mb-2">Rincian Hasil Checklist</h4>
-                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-100 text-slate-700 text-[11px] uppercase">
-                                <tr>
-                                    <th class="p-2">Item Parameter</th>
-                                    <th class="p-2">Standar</th>
-                                    <th class="p-2">Hasil Ukur</th>
-                                    <th class="p-2">Status</th>
-                                    <th class="p-2">Catatan</th>
-                                </tr>
-                            </thead>
-                            <tbody>${itemsDetailHtml}</tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-sm text-slate-900 mb-2">Dokumentasi Foto Evidence</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${photosHtml}</div>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <h4 class="font-bold text-xs text-slate-700 mb-1">Catatan/Rekomendasi Inspektor:</h4>
-                    <p class="text-xs text-slate-600">${rec.overallNotes || 'Tidak ada catatan khusus.'}</p>
-                </div>
-            `;
-
-            document.getElementById('detailModal').classList.remove('hidden');
-        }
-
-        function closeDetailModal() {
-            document.getElementById('detailModal').classList.add('hidden');
-        }
-
-        function editInspectionRecord(id) {
-            const rec = inspectionHistory.find(r => r.id === id);
-            if (!rec) return;
-
-            editingInspectionId = rec.id;
-            document.getElementById('form-mode-badge').innerText = "Edit Mode";
-            document.getElementById('doc-id-display').innerText = `ID: ${rec.id}`;
-
-            document.getElementById('panelName').value = rec.panelName;
-            document.getElementById('panelLocation').value = rec.panelLocation;
-            document.getElementById('panelType').value = rec.panelType || 'LVT (Low Voltage Transformer)';
-            document.getElementById('ratedVoltage').value = rec.ratedVoltage || '';
-            document.getElementById('inspectorName').value = rec.inspectorName;
-            document.getElementById('inspectionDate').value = rec.inspectionDate;
-            document.getElementById('overallNotes').value = rec.overallNotes || '';
-            document.getElementById('overallStatus').value = rec.overallStatus;
-            document.getElementById('supervisorName').value = rec.supervisorName || '';
-
-            // Dynamic Form Populate
-            renderDynamicInspectionForm();
-            rec.itemResults.forEach(item => {
-                if (item.inputType === 'STATUS') {
-                    const radios = document.getElementsByName(`check_${item.itemId}`);
-                    for (let r of radios) {
-                        if (r.value === item.status) r.checked = true;
-                    }
+                if (matchesQuery && matchesStatus) {
+                    row.style.display = '';
                 } else {
-                    const valInput = document.getElementById(`value_${item.itemId}`);
-                    const statusSel = document.getElementById(`status_val_${item.itemId}`);
-                    if (valInput) valInput.value = item.measuredValue || '';
-                    if (statusSel) statusSel.value = item.status || 'BAIK';
+                    row.style.display = 'none';
                 }
-                const noteInput = document.getElementById(`note_${item.itemId}`);
-                if (noteInput) noteInput.value = item.note || '';
             });
-
-            // Evidence Photos
-            uploadedEvidence = rec.evidencePhotos ? [...rec.evidencePhotos] : [];
-            renderEvidenceGrid();
-
-            switchTab('inspection-form');
         }
 
-        function deleteInspectionRecord(id) {
-            if (confirm(`Apakah Anda yakin ingin menghapus laporan ${id}?`)) {
+        function deleteRecord(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data laporan inspeksi ini?')) {
                 inspectionHistory = inspectionHistory.filter(r => r.id !== id);
-                localStorage.setItem('eleccheck_inspections', JSON.stringify(inspectionHistory));
-                updateStats();
-                renderHistoryTable();
-                showToast('Laporan berhasil dihapus', 'info');
+                localStorage.setItem('panel_inspection_history', JSON.stringify(inspectionHistory));
+                renderDashboard();
             }
+        }
+
+        // Master Item CRUD Manager
+        function renderMasterItems() {
+            const container = document.getElementById('master-items-container');
+            container.innerHTML = '';
+
+            const grouped = {};
+            masterItems.forEach(item => {
+                if (!grouped[item.category]) grouped[item.category] = [];
+                grouped[item.category].push(item);
+            });
+
+            Object.keys(grouped).forEach(cat => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden';
+                card.innerHTML = `
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex items-center justify-between">
+                        <h3 class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-layer-group text-amber-500 mr-2"></i>${cat}</h3>
+                        <span class="text-xs text-slate-500 font-medium">${grouped[cat].length} Parameter</span>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        ${grouped[cat].map((item, idx) => `
+                            <div class="px-6 py-3 flex items-center justify-between hover:bg-slate-50/50 transition">
+                                <div class="text-sm text-slate-700 flex items-center gap-3">
+                                    <span class="font-mono text-slate-400 text-xs">${idx+1}.</span>
+                                    <span>${item.question}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="openEditItemModal('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition text-xs"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="deleteMasterItem('${item.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition text-xs"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openAddItemModal() {
+            document.getElementById('modalItemTitle').textContent = 'Tambah Parameter CheckList';
+            document.getElementById('editItemId').value = '';
+            document.getElementById('itemCategory').value = '1. Kondisi Fisik & Enklosur';
+            document.getElementById('itemQuestion').value = '';
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+
+        function openEditItemModal(id) {
+            const item = masterItems.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('modalItemTitle').textContent = 'Edit Parameter CheckList';
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('itemQuestion').value = item.question;
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.add('hidden');
+        }
+
+        function saveMasterItem(e) {
+            e.preventDefault();
+            const id = document.getElementById('editItemId').value;
+            const category = document.getElementById('itemCategory').value.trim();
+            const question = document.getElementById('itemQuestion').value.trim();
+
+            if (id) {
+                const item = masterItems.find(i => i.id === id);
+                if (item) {
+                    item.category = category;
+                    item.question = question;
+                }
+            } else {
+                masterItems.push({
+                    id: 'm_' + Date.now(),
+                    category,
+                    question
+                });
+            }
+
+            localStorage.setItem('panel_master_items', JSON.stringify(masterItems));
+            closeItemModal();
+            renderMasterItems();
+            renderInspectionFormChecklist();
+        }
+
+        function deleteMasterItem(id) {
+            if (confirm('Hapus parameter ini dari master checklist?')) {
+                masterItems = masterItems.filter(i => i.id !== id);
+                localStorage.setItem('panel_master_items', JSON.stringify(masterItems));
+                renderMasterItems();
+                renderInspectionFormChecklist();
+            }
+        }
+
+        function resetTemplateToDefault() {
+            if (confirm('Kembalikan master checklist ke pengaturan awal standar?')) {
+                masterItems = [...defaultMasterItems];
+                localStorage.setItem('panel_master_items', JSON.stringify(masterItems));
+                renderMasterItems();
+                renderInspectionFormChecklist();
+            }
+        }
+
+        function loadSettingsToForm() {
+            document.getElementById('settingCompanyName').value = companySettings.name;
+            document.getElementById('settingSubTitle').value = companySettings.subtitle;
+            document.getElementById('settingAddress').value = companySettings.address;
         }
 
         function saveSettings() {
             companySettings = {
-                name: document.getElementById('settingCompanyName').value,
-                subTitle: document.getElementById('settingSubTitle').value,
-                address: document.getElementById('settingAddress').value
+                name: document.getElementById('settingCompanyName').value.trim(),
+                subtitle: document.getElementById('settingSubTitle').value.trim(),
+                address: document.getElementById('settingAddress').value.trim()
             };
-            localStorage.setItem('eleccheck_settings', JSON.stringify(companySettings));
-            showToast('Pengaturan Kop Laporan PDF Disimpan!', 'success');
+            localStorage.setItem('panel_company_settings', JSON.stringify(companySettings));
+            alert('Pengaturan kop laporan berhasil disimpan!');
         }
 
-
-        function generatePDFReport(id) {
-            const rec = inspectionHistory.find(r => r.id === id);
-            if (!rec) {
-                showToast('Laporan tidak ditemukan', 'error');
-                return;
-            }
+        // Professional PDF Generator using jsPDF & AutoTable
+        function generatePDF(recordId) {
+            const record = inspectionHistory.find(r => r.id === recordId);
+            if (!record) return;
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = doc.internal.pageSize.getWidth();
 
-            // Colors
-            const darkBlue = [15, 23, 42];
-            const amberColor = [245, 158, 11];
-            const grayText = [71, 85, 105];
-
-            // HEADER KOP PERUSAHAAN
-            doc.setFillColor(...darkBlue);
-            doc.rect(0, 0, pageWidth, 28, 'F');
+            // Header Banner
+            doc.setFillColor(15, 23, 42); // slate-900
+            doc.rect(0, 0, 210, 28, 'F');
 
             doc.setTextColor(255, 255, 255);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('inter', 'bold');
             doc.setFontSize(14);
-            doc.text(companySettings.name.toUpperCase(), 14, 12);
+            doc.text(companySettings.name, 14, 12);
 
-            doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
+            doc.setTextColor(245, 158, 11); // amber
+            doc.text(companySettings.subtitle, 14, 18);
+
+            doc.setFont('inter', 'normal');
+            doc.setFontSize(7.5);
             doc.setTextColor(203, 213, 225);
-            doc.text(companySettings.subTitle, 14, 18);
             doc.text(companySettings.address, 14, 23);
 
-            // REPORT TITLE & STATUS BADGE
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(13);
-            doc.setTextColor(...darkBlue);
-            doc.text("LAPORAN INSPEKSI PANEL ELEKTRIKAL", 14, 38);
+            // Document Title
+            doc.setTextColor(15, 23, 42);
+            doc.setFont('inter', 'bold');
+            doc.setFontSize(12);
+            doc.text('LAPORAN INSPEKSI & CHECKLIST PANEL ELEKTRIKAL', 14, 38);
 
-            // Status Stamp Box
-            let statusText = rec.overallStatus;
-            let badgeBg = [16, 185, 129]; // Green
-            if (rec.overallStatus === 'PERHATIAN') badgeBg = [245, 158, 11];
-            if (rec.overallStatus === 'BAHAYA') badgeBg = [220, 38, 38];
+            // Metadata Box
+            doc.setFillColor(248, 250, 252);
+            doc.setDrawColor(226, 232, 240);
+            doc.roundedRect(14, 43, 182, 32, 2, 2, 'FD');
 
-            doc.setFillColor(...badgeBg);
-            doc.roundedRect(pageWidth - 50, 32, 36, 10, 2, 2, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'bold');
-            doc.text(statusText, pageWidth - 32, 38.5, { align: 'center' });
+            doc.setFontSize(8.5);
+            doc.setFont('inter', 'bold');
+            doc.text('No. Laporan :', 18, 50);
+            doc.text('Nama Panel :', 18, 56);
+            doc.text('Lokasi / Area :', 18, 62);
+            doc.text('Tipe Panel :', 18, 68);
 
-            // INFORMATION TABLE
-            const formattedDate = new Date(rec.inspectionDate).toLocaleString('id-ID', {
-                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
+            doc.setFont('inter', 'normal');
+            doc.text(record.reportNo, 48, 50);
+            doc.text(record.panelName, 48, 56);
+            doc.text(record.panelLocation, 48, 62);
+            doc.text(record.panelType, 48, 68);
 
-            doc.autoTable({
-                startY: 45,
-                margin: { left: 14, right: 14 },
-                theme: 'plain',
-                styles: { fontSize: 8.5, cellPadding: 1.5, textColor: [30, 41, 59] },
-                columnStyles: {
-                    0: { fontStyle: 'bold', cellWidth: 32, textColor: grayText },
-                    1: { cellWidth: 60 },
-                    2: { fontStyle: 'bold', cellWidth: 32, textColor: grayText },
-                    3: { cellWidth: 58 }
-                },
-                body: [
-                    ['No. Laporan:', rec.id, 'Tanggal Inspeksi:', formattedDate],
-                    ['Nama Panel:', rec.panelName, 'Inspektor:', rec.inspectorName],
-                    ['Lokasi / Area:', rec.panelLocation, 'Rating Tegangan:', rec.ratedVoltage || '-'],
-                    ['Tipe Panel:', rec.panelType || 'Panel Elektrikal', 'Supervisor:', rec.supervisorName || '-']
-                ]
-            });
+            doc.setFont('inter', 'bold');
+            doc.text('Tgl Inspeksi :', 115, 50);
+            doc.text('Inspektor :', 115, 56);
+            doc.text('Tegangan :', 115, 62);
+            doc.text('Status Akhir :', 115, 68);
 
-            // CHECKLIST DETAILS TABLE
-            const tableRows = [];
-            let currentCat = '';
+            doc.setFont('inter', 'normal');
+            doc.text(record.inspectionDate.replace('T', ' '), 142, 50);
+            doc.text(record.inspectorName, 142, 56);
+            doc.text(record.ratedVoltage || '-', 142, 62);
+            
+            doc.setFont('inter', 'bold');
+            if (record.overallStatus === 'LULUS') doc.setTextColor(16, 185, 129);
+            else if (record.overallStatus === 'PERHATIAN') doc.setTextColor(217, 119, 6);
+            else doc.setTextColor(220, 38, 38);
+            doc.text(record.overallStatus, 142, 68);
 
-            rec.itemResults.forEach((item, idx) => {
-                if (item.category !== currentCat) {
-                    currentCat = item.category;
-                    // Category Header Row
-                    tableRows.push([{ content: currentCat, colSpan: 5, styles: { fontStyle: 'bold', fillColor: [241, 245, 249], textColor: [15, 23, 42] } }]);
-                }
-
-                const displayResult = item.inputType === 'STATUS' ? item.status : `${item.measuredValue || '-'} (${item.status})`;
-                tableRows.push([
-                    (idx + 1).toString(),
-                    item.name,
-                    item.standard || '-',
-                    displayResult,
-                    item.note || '-'
-                ]);
-            });
+            // Checklist Table
+            const tableBody = record.checklistResults.map((item, index) => [
+                index + 1,
+                item.category,
+                item.question,
+                item.status === 'PASS' ? 'PASS (Baik)' : (item.status === 'WARN' ? 'PERHATIAN' : 'BAHAYA / GAGAL')
+            ]);
 
             doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 4,
-                margin: { left: 14, right: 14 },
-                head: [['No', 'Parameter Check', 'Standar Acuan', 'Hasil Inspeksi', 'Catatan/Keterangan']],
-                body: tableRows,
+                startY: 80,
+                head: [['No', 'Kategori', 'Parameter Pemeriksaan CheckList', 'Status']],
+                body: tableBody,
                 theme: 'grid',
-                headStyles: { fillColor: darkBlue, textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
-                styles: { fontSize: 8, cellPadding: 2, textColor: [30, 41, 59] },
+                headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+                bodyStyles: { fontSize: 7.5, textColor: [51, 65, 85] },
                 columnStyles: {
                     0: { cellWidth: 10, halign: 'center' },
-                    1: { cellWidth: 55 },
-                    2: { cellWidth: 45 },
-                    3: { cellWidth: 35, fontStyle: 'bold' },
-                    4: { cellWidth: 37 }
+                    1: { cellWidth: 45 },
+                    2: { cellWidth: 95 },
+                    3: { cellWidth: 32, halign: 'center', fontStyle: 'bold' }
                 },
                 didParseCell: function(data) {
                     if (data.section === 'body' && data.column.index === 3) {
                         const val = data.cell.raw;
-                        if (typeof val === 'string' && (val.includes('RUSAK') || val.includes('BAHAYA') || val.includes('ABNORMAL'))) {
-                            data.cell.styles.textColor = [220, 38, 38];
-                        } else if (typeof val === 'string' && val.includes('PERHATIAN')) {
-                            data.cell.styles.textColor = [217, 119, 6];
-                        } else if (typeof val === 'string' && (val.includes('BAIK') || val.includes('NORMAL'))) {
-                            data.cell.styles.textColor = [16, 185, 129];
-                        }
+                        if (val.includes('OKE')) data.cell.styles.textColor = [16, 185, 129];
+                        else if (val.includes('PERHATIAN')) data.cell.styles.textColor = [217, 119, 6];
+                        else data.cell.styles.textColor = [220, 38, 38];
                     }
                 }
             });
 
-            let currentY = doc.lastAutoTable.finalY + 6;
+            let finalY = doc.lastAutoTable.finalY + 8;
 
-            // OVERALL NOTES BOX
-            if (currentY > 240) {
+            // Check if Notes or Signatures fit, otherwise add page
+            if (finalY > 230) {
                 doc.addPage();
-                currentY = 20;
+                finalY = 20;
             }
 
-            doc.setFillColor(248, 250, 252);
-            doc.setDrawColor(226, 232, 240);
-            doc.roundedRect(14, currentY, pageWidth - 28, 18, 1, 1, 'FD');
-
-            doc.setFont('helvetica', 'bold');
+            // Notes Section
+            doc.setFillColor(241, 245, 249);
+            doc.roundedRect(14, finalY, 182, 22, 2, 2, 'F');
+            doc.setFont('inter', 'bold');
             doc.setFontSize(8.5);
-            doc.setTextColor(...darkBlue);
-            doc.text("KESIMPULAN & REKOMENDASI TINDAPAN:", 17, currentY + 5);
+            doc.setTextColor(15, 23, 42);
+            doc.text('Catatan & Rekomendasi:', 18, finalY + 6);
+            doc.setFont('inter', 'normal');
+            doc.setFontSize(7.5);
+            const splitNotes = doc.splitTextToSize(record.overallNotes || 'Tidak ada catatan khusus.', 174);
+            doc.text(splitNotes, 18, finalY + 12);
 
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            doc.setTextColor(...grayText);
-            const splitNotes = doc.splitTextToSize(rec.overallNotes || 'Kondisi panel telah diinspeksi secara menyeluruh sesuai standar K3 listrik.', pageWidth - 34);
-            doc.text(splitNotes, 17, currentY + 10);
+            finalY += 28;
 
-            currentY += 24;
-
-            // EVIDENCE PHOTOS IN PDF
-            if (rec.evidencePhotos && rec.evidencePhotos.length > 0) {
-                if (currentY > 210) {
+            // Evidence Photos Section (if any)
+            if (record.evidenceImages && record.evidenceImages.length > 0) {
+                if (finalY > 190) {
                     doc.addPage();
-                    currentY = 20;
+                    finalY = 20;
                 }
-
-                doc.setFont('helvetica', 'bold');
+                doc.setFont('inter', 'bold');
                 doc.setFontSize(9);
-                doc.setTextColor(...darkBlue);
-                doc.text("DOKUMENTASI FOTO EVIDENCE LAPANGAN:", 14, currentY);
-                currentY += 4;
+                doc.text('Lampiran Foto Evidence Dokumentasi:', 14, finalY);
+                finalY += 4;
 
-                let imgX = 14;
-                let imgY = currentY;
-                const imgWidth = 42;
-                const imgHeight = 32;
+                let xPos = 14;
+                let yPos = finalY;
+                const imgSize = 36;
+                const margin = 6;
 
-                rec.evidencePhotos.slice(0, 4).forEach((img, index) => {
-                    if (imgX + imgWidth > pageWidth - 14) {
-                        imgX = 14;
-                        imgY += imgHeight + 8;
+                record.evidenceImages.forEach((img, idx) => {
+                    if (xPos + imgSize > 196) {
+                        xPos = 14;
+                        yPos += imgSize + margin;
+                    }
+                    if (yPos + imgSize > 275) {
+                        doc.addPage();
+                        yPos = 20;
+                        xPos = 14;
                     }
                     try {
-                        doc.addImage(img.dataUrl, 'JPEG', imgX, imgY, imgWidth, imgHeight);
-                        doc.setFontSize(7);
-                        doc.setTextColor(100, 116, 139);
-                        doc.text(img.caption ? img.caption.substring(0, 22) : `Foto ${index+1}`, imgX, imgY + imgHeight + 3);
-                    } catch (err) {
-                        console.error('Failed to add image to PDF', err);
+                        doc.addImage(img.dataUrl, 'JPEG', xPos, yPos, imgSize, imgSize);
+                        doc.setDrawColor(203, 213, 225);
+                        doc.rect(xPos, yPos, imgSize, imgSize);
+                    } catch (e) {
+                        console.error('Error adding image to PDF', e);
                     }
-                    imgX += imgWidth + 5;
+                    xPos += imgSize + margin;
                 });
-
-                currentY = imgY + imgHeight + 10;
+                finalY = yPos + imgSize + 10;
             }
 
-            // SIGNATURE BLOCK
-            if (currentY > 230) {
+            // Signatures Section
+            if (finalY > 220) {
                 doc.addPage();
-                currentY = 25;
+                finalY = 20;
             }
 
-            const sigY = currentY + 5;
+            doc.setFont('inter', 'bold');
+            doc.setFontSize(8.5);
+            doc.text('Disetujui Oleh:', 14, finalY);
+            doc.text('Dibuat Oleh:', 115, finalY);
+
+            finalY += 4;
+            doc.setFont('inter', 'normal');
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...darkBlue);
+            doc.text(`Supervisor: ${record.supervisorName}`, 14, finalY + 4);
+            doc.text(`Inspektor: ${record.inspectorName}`, 115, finalY + 4);
 
-            // Left Block: Inspector
-            doc.text("Diinspeksi Oleh (Teknisi):", 25, sigY);
-            if (rec.inspectorSig) {
+            // Draw signature images if available
+            if (record.supervisorSig) {
                 try {
-                    doc.addImage(rec.inspectorSig, 'PNG', 22, sigY + 2, 40, 18);
-                } catch(e){}
+                    doc.addImage(record.supervisorSig, 'PNG', 14, finalY + 8, 45, 20);
+                } catch (e) {}
             }
-            doc.line(20, sigY + 22, 75, sigY + 22);
-            doc.text(rec.inspectorName, 25, sigY + 26);
+            if (record.inspectorSig) {
+                try {
+                    doc.addImage(record.inspectorSig, 'PNG', 115, finalY + 8, 45, 20);
+                } catch (e) {}
+            }
 
-            // Right Block: Supervisor
-            doc.text("Disetujui Oleh (Supervisor):", pageWidth - 75, sigY);
-            if (rec.supervisorSig) {
-                try {
-                    doc.addImage(rec.supervisorSig, 'PNG', pageWidth - 78, sigY + 2, 40, 18);
-                } catch(e){}
-            }
-            doc.line(pageWidth - 80, sigY + 22, pageWidth - 25, sigY + 22);
-            doc.text(rec.supervisorName || 'Supervisor / Manager', pageWidth - 75, sigY + 26);
+            doc.setDrawColor(150, 150, 150);
+            doc.line(14, finalY + 30, 65, finalY + 30);
+            doc.line(115, finalY + 30, 166, finalY + 30);
+
+            doc.text('( Supervisor / Manager )', 14, finalY + 34);
+            doc.text('( Teknisi / Inspektor )', 115, finalY + 34);
 
             // Save PDF
-            doc.save(`Laporan_Inspeksi_${rec.panelName.replace(/[^a-zA-Z0-9]/g, '_')}_${rec.id}.pdf`);
-            showToast('Laporan PDF berhasil diunduh!', 'success');
+            doc.save(`Laporan_Inspeksi_${record.reportNo}_${record.panelName.replace(/\s+/g, '_')}.pdf`);
         }
     </script>
 </body>
